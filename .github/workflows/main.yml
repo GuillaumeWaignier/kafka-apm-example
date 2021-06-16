@@ -1,0 +1,107 @@
+# This workflow will build a Java project with Maven
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-maven
+
+name: Build
+
+on:
+  push:
+    branches:
+      - master
+    tags:
+      - '*'
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+
+      # Cache docker image
+      - name: Cache Docker image
+        uses: actions/cache@v2
+        with:
+          path: /var/lib/docker/image/overlay2
+          key: ${{ runner.os }}-docker-${{ hashFiles('/var/lib/docker/image/overlay2/repositories.json') }}
+          restore-keys: |
+            ${{ runner.os }}-docker-
+
+      # Java
+      - name: Set up JDK 11
+        uses: actions/setup-java@v1
+        with:
+          java-version: 11
+
+      # Cache maven repo
+      - name: Cache local Maven repository
+        uses: actions/cache@v2
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      # Add host to /etc/hosts
+      - name: Add hosts to /etc/hosts
+        run: |
+          sudo echo "127.0.0.1 kafka" | sudo tee -a /etc/hosts
+
+      # Build Maven
+      - name: Build with Maven
+        run: mvn -B package verify sonar:sonar -Dsonar.login=${{ secrets.SONAR_TOKEN }} --file pom.xml
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      # Push docker image (master=latest)
+      - name: Push to Docker Hub
+        uses: docker/build-push-action@v1
+        if: github.ref == 'refs/heads/master' || startsWith(github.ref, 'refs/tags/')
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_PASSWORD }}
+          repository: ianitrix/kafka-apm-example
+          tag_with_ref: true
+
+      # Compute archive file name
+      - name: Compute archive file name
+        id: fileName
+        run: echo "::set-output name=archiveFileName::`ls target/*bin.tar.gz | cut -d'/' -f2`"
+
+      # Compute version
+      - name: Compute version of release
+        id: versionName
+        run: echo "::set-output name=versionName::`echo ${{ steps.fileName.outputs.archiveFileName }} | cut -d'-' -f4`"
+
+
+      # Create GitHub release
+      - name: Create Release
+        id: create_release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: v${{ steps.versionName.outputs.versionName }}
+          draft: true
+          prerelease: true
+
+
+      # Upload Archive
+      - name: Upload Release Archive
+        id: upload-release-asset
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: target/${{ steps.fileName.outputs.archiveFileName }}
+          asset_name: ${{ steps.fileName.outputs.archiveFileName }}
+          asset_content_type: application/gzip
