@@ -31,7 +31,16 @@ public class Main {
 
         final Properties config = computeStreamConfig(args[0]);
 
-        final Topology topology = new StatelessTopology().buildStream();
+        final String mode = config.getProperty("mode");
+        Topology topology = null;
+        if ("map".equals(mode)) {
+            topology = new StatelessTopology().buildStream();
+        } else if ("join".equals(mode)) {
+            topology = new StatefullJoinTopology().buildStream();
+        } else {
+            exitWithError("Unknown mode " + mode + " / Possible mode are 'map' or 'join'", new IllegalArgumentException());
+        }
+
         log.info(topology.describe().toString());
 
         final KafkaStreams streams = new KafkaStreams(topology, config);
