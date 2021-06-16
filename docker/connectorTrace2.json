@@ -1,0 +1,15 @@
+{
+  "name":"test2",
+  "config": {
+    "connector.class":"ElasticsearchSinkConnector",
+    "name":"test2",
+    "connection.url":"http://elasticsearch:9200",
+    "type.name":"trace",
+    "topics":"test_json_kstream_stateless",
+    "auto.create.indices.at.start": true,
+    "key.ignore": "true",
+    "schema.ignore":true,
+    "errors.tolerance":"none",
+    "errors.retry.timeout":-1
+  }
+}

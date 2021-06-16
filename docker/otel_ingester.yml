@@ -1,0 +1,23 @@
+receivers:
+  kafka:
+    brokers:
+      - kafka-1:9092
+    topic: oltp_spans
+  
+exporters:
+  jaeger:
+    endpoint: jaeger-collector:14250
+    insecure: true
+  elastic:
+      apm_server_url: "http://apm-server:8200"
+      
+processors:
+  batch:
+
+service:
+  pipelines:
+    traces:
+      receivers: [kafka]
+      processors: [batch]
+      exporters: [jaeger,"elastic"]
+ 
