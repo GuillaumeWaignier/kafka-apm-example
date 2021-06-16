@@ -11,7 +11,7 @@ public class StatelessTopology {
     public Topology buildStream() {
 
         final StreamsBuilder builder = new StreamsBuilder();
-        final KStream<String, String> input = builder.stream("test");
+        final KStream<String, String> input = builder.stream("test3");
         final KStream<String,String> json = input.mapValues(s -> "{\"id\":\"" + s + "\"}");
         json.to("test_json_kstream_stateless");
 

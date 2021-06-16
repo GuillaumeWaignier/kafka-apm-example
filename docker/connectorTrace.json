@@ -1,11 +1,11 @@
 {
-  "name":"test",
+  "name":"connect-test1",
   "config": {
     "connector.class":"ElasticsearchSinkConnector",
-    "name":"test",
+    "name":"connect-test1",
     "connection.url":"http://elasticsearch:9200",
     "type.name":"trace",
-    "topics":"TEST_JSON",
+    "topics":"TEST_JSON_KSQL",
     "auto.create.indices.at.start": true,
     "key.ignore": "true",
     "schema.ignore":true,

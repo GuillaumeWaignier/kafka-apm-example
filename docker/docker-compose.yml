@@ -300,9 +300,39 @@ services:
       - kafka-1
     environment:
       KAFKA_OPTS: "-javaagent:/opentelemetry-javaagent-all.jar"
-      OTEL_RESOURCE_ATTRIBUTES: "service.name=producer,service.version=1.1,deployment.environment=production"
+      OTEL_RESOURCE_ATTRIBUTES: "service.name=producer1,service.version=1.1,deployment.environment=production"
       OTEL_EXPORTER_OTLP_ENDPOINT: "${EXPORTER}"
-    entrypoint: "kafka-producer-perf-test --topic test --num-records 1000000 --throughput ${THROUGHPUT} --record-size 100 --producer-props bootstrap.servers=kafka-1:9092 client.id=myProducer1"
+    entrypoint: "kafka-producer-perf-test --topic test1 --num-records 1000000 --throughput ${THROUGHPUT} --record-size 100 --producer-props bootstrap.servers=kafka-1:9092 client.id=producer1"
+    volumes:
+      - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
+    restart: on-failure
+
+  load-data-p2:
+    image: "ianitrix/kafka:${CONFLUENT_VERSION}"
+    networks:
+      - elastic
+    depends_on:
+      - kafka-1
+    environment:
+      KAFKA_OPTS: "-javaagent:/opentelemetry-javaagent-all.jar"
+      OTEL_RESOURCE_ATTRIBUTES: "service.name=producer2,service.version=1.1,deployment.environment=production"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "${EXPORTER}"
+    entrypoint: "kafka-producer-perf-test --topic test2 --num-records 1000000 --throughput ${THROUGHPUT} --record-size 100 --producer-props bootstrap.servers=kafka-1:9092 client.id=producer2"
+    volumes:
+      - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
+    restart: on-failure
+
+  load-data-p3:
+    image: "ianitrix/kafka:${CONFLUENT_VERSION}"
+    networks:
+      - elastic
+    depends_on:
+      - kafka-1
+    environment:
+      KAFKA_OPTS: "-javaagent:/opentelemetry-javaagent-all.jar"
+      OTEL_RESOURCE_ATTRIBUTES: "service.name=producer3,service.version=1.1,deployment.environment=production"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "${EXPORTER}"
+    entrypoint: "kafka-producer-perf-test --topic test3 --num-records 1000000 --throughput ${THROUGHPUT} --record-size 100 --producer-props bootstrap.servers=kafka-1:9092 client.id=producer3"
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
     restart: on-failure
@@ -317,7 +347,7 @@ services:
       KAFKA_OPTS: "-javaagent:/opentelemetry-javaagent-all.jar"
       OTEL_RESOURCE_ATTRIBUTES: "service.name=consumer1,service.version=1.1,deployment.environment=production"
       OTEL_EXPORTER_OTLP_ENDPOINT: "${EXPORTER}"
-    entrypoint: "kafka-console-consumer --topic test --from-beginning  --bootstrap-server kafka-1:9092 --consumer-property client.id=myConsumer1 --group=myGroup1"
+    entrypoint: "kafka-console-consumer --topic test1 --from-beginning  --bootstrap-server kafka-1:9092 --consumer-property client.id=myConsumer1 --group=myGroup1"
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
     restart: on-failure
@@ -332,13 +362,11 @@ services:
       KAFKA_OPTS: "-javaagent:/opentelemetry-javaagent-all.jar"
       OTEL_RESOURCE_ATTRIBUTES: "service.name=consumer2,service.version=1.1,deployment.environment=production"
       OTEL_EXPORTER_OTLP_ENDPOINT: "${EXPORTER}"  
-    entrypoint: "kafka-console-consumer --topic test --from-beginning --bootstrap-server kafka-1:9092 --consumer-property client.id=myConsumer2 --group=myGroup2"
+    entrypoint: "kafka-console-consumer --topic test1 --from-beginning --bootstrap-server kafka-1:9092 --consumer-property client.id=myConsumer2 --group=myGroup2"
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
     restart: on-failure
 
-  
-  
   load-es-connector-trace:
     image: "curlimages/curl:7.69.0"
     hostname: curl
@@ -374,6 +402,24 @@ services:
     volumes:
       - ./deployConnector.sh:/deployConnector.sh:ro
       - ./connectorTrace2.json:/body.json:ro
+
+  load-es-connector-trace3:
+    image: "curlimages/curl:7.69.0"
+    hostname: curl
+    entrypoint:
+      - "/deployConnector.sh"
+      - "http://kafka-connect:8083"
+      - ""
+      - "body.json"
+    depends_on:
+      - kafka-connect
+      - elasticsearch
+    networks:
+      - elastic
+    restart: on-failure
+    volumes:
+      - ./deployConnector.sh:/deployConnector.sh:ro
+      - ./connectorTrace3.json:/body.json:ro
 
   kstream-stateless:
     image: ianitrix/kafka-apm-example:latest

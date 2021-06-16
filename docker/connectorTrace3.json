@@ -1,16 +1,15 @@
 {
-  "name":"connect-test2",
+  "name":"connect-test3",
   "config": {
     "connector.class":"ElasticsearchSinkConnector",
-    "name":"connect-test2",
+    "name":"connect-test3",
     "connection.url":"http://elasticsearch:9200",
     "type.name":"trace",
-    "topics":"test_json_kstream_statefullJoin",
+    "topics":"test_json_kstream_stateless",
     "auto.create.indices.at.start": true,
     "key.ignore": "true",
     "schema.ignore":true,
     "errors.tolerance":"none",
-    "errors.retry.timeout":-1,
-    "key.converter": "org.apache.kafka.connect.storage.StringConverter"
+    "errors.retry.timeout":-1
   }
 }

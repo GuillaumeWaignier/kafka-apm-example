@@ -13,8 +13,8 @@ public class StatefullJoinTopology {
     public Topology buildStream() {
 
         final StreamsBuilder builder = new StreamsBuilder();
-        final KStream<byte[], String> input1 = builder.stream("test");
-        final KTable<String, String> input2 = builder.table("test2", Consumed.with(Serdes.String(), Serdes.String()));
+        final KStream<byte[], String> input1 = builder.stream("test2");
+        final KTable<String, String> input2 = builder.table("test1", Consumed.with(Serdes.String(), Serdes.String()));
 
         final KStream<String, String> joined = input1.selectKey((k, v) -> v)
                 .leftJoin(input2, (v1, v2) -> "{\"id\":\"" + v1 + "\"}", Joined.with(Serdes.String(), Serdes.String(), Serdes.String()));
