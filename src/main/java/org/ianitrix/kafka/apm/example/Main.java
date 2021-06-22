@@ -33,12 +33,18 @@ public class Main {
 
         final String mode = config.getProperty("mode");
         Topology topology = null;
-        if ("map".equals(mode)) {
-            topology = new StatelessTopology().buildStream();
-        } else if ("join".equals(mode)) {
-            topology = new StatefullJoinTopology().buildStream();
-        } else {
-            exitWithError("Unknown mode " + mode + " / Possible mode are 'map' or 'join'", new IllegalArgumentException());
+        switch(mode) {
+            case "map":
+                topology = new StatelessTopology().buildStream();
+                break;
+            case "join":
+                topology = new StatefullJoinTopology().buildStream();
+                break;
+            case "transform":
+                topology = new StatefullTransformTopology().buildStream();
+                break;
+            default:
+                exitWithError("Unknown mode " + mode + " / Possible mode are 'map' or 'join'", new IllegalArgumentException());
         }
 
         log.info(topology.describe().toString());
