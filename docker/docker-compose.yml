@@ -152,6 +152,10 @@ services:
      OTEL_EXPORTER_OTLP_ENDPOINT: "${EXPORTER}"
      JAVA_OPTS: "-javaagent:/opentelemetry-javaagent-all.jar -Xms256m -Xmx256m" 
      AKHQ_CONFIGURATION: |
+        micronaut:
+         server:
+           cors:
+             enabled: true
         akhq:
           connections:
             docker-kafka-server:
@@ -469,7 +473,7 @@ services:
       - KAFKATRACE_mode=map
       - KAFKATRACE_application_id=kstream-stateless-2-8
       - JAVA_OPTION=-javaagent:/opentelemetry-javaagent-all.jar
-      - JAVA_HEAP=-Xms256m -Xmx256m
+      #- JAVA_HEAP=-Xms256m -Xmx256m
       - OTEL_RESOURCE_ATTRIBUTES=service.name=kstream-stateless-2-8,service.version=1.1,deployment.environment=production
       - OTEL_EXPORTER_OTLP_ENDPOINT=${EXPORTER}
     volumes:
@@ -488,7 +492,7 @@ services:
       - KAFKATRACE_mode=map
       - KAFKATRACE_application_id=kstream-stateless-2-5
       - JAVA_OPTION=-javaagent:/opentelemetry-javaagent-all.jar
-      - JAVA_HEAP=-Xms256m -Xmx256m
+      #- JAVA_HEAP=-Xms256m -Xmx256m
       - OTEL_RESOURCE_ATTRIBUTES=service.name=kstream-stateless-2-5,service.version=1.1,deployment.environment=production
       - OTEL_EXPORTER_OTLP_ENDPOINT=${EXPORTER}
     volumes:
@@ -507,7 +511,7 @@ services:
       - KAFKATRACE_mode=join
       - KAFKATRACE_application_id=kstream-statefullJoin-2-8
       - JAVA_OPTION=-javaagent:/opentelemetry-javaagent-all.jar
-      - JAVA_HEAP=-Xms256m -Xmx256m
+      #- JAVA_HEAP=-Xms256m -Xmx256m
       - OTEL_RESOURCE_ATTRIBUTES=service.name=kstream-statefullJoin-2-8,service.version=1.1,deployment.environment=production
       - OTEL_EXPORTER_OTLP_ENDPOINT=${EXPORTER}
     volumes:
@@ -526,30 +530,30 @@ services:
       - KAFKATRACE_mode=join
       - KAFKATRACE_application_id=kstream-statefullJoin-2-5
       - JAVA_OPTION=-javaagent:/opentelemetry-javaagent-all.jar
-      - JAVA_HEAP=-Xms256m -Xmx256m
+      #- JAVA_HEAP=-Xms256m -Xmx256m
       - OTEL_RESOURCE_ATTRIBUTES=service.name=kstream-statefullJoin-2-5,service.version=1.1,deployment.environment=production
       - OTEL_EXPORTER_OTLP_ENDPOINT=${EXPORTER}
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
 
 
-  kstream-statefull-transform:
-    image: ianitrix/kafka-apm-example:latest
-    restart: always
-    hostname: kstream-statefullTransform
-    container_name: kstream-statefullTransform
-    networks:
-      - elastic
-    environment:
-      - KAFKATRACE_bootstrap_servers=kafka-1:9092
-      - KAFKATRACE_mode=transform
-      - KAFKATRACE_application_id=kstream-statefullTransform
-      - JAVA_OPTION=-javaagent:/opentelemetry-javaagent-all.jar
-      - JAVA_HEAP=-Xms256m -Xmx256m
-      - OTEL_RESOURCE_ATTRIBUTES=service.name=kstream-statefullTransform,service.version=1.1,deployment.environment=production
-      - OTEL_EXPORTER_OTLP_ENDPOINT=${EXPORTER}
-    volumes:
-      - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
+#  kstream-statefull-transform:
+#    image: ianitrix/kafka-apm-example:latest
+#    restart: always
+#    hostname: kstream-statefullTransform
+#    container_name: kstream-statefullTransform
+#    networks:
+#      - elastic
+#    environment:
+#      - KAFKATRACE_bootstrap_servers=kafka-1:9092
+#      - KAFKATRACE_mode=transform
+#      - KAFKATRACE_application_id=kstream-statefullTransform
+#      - JAVA_OPTION=-javaagent:/opentelemetry-javaagent-all.jar
+#      - JAVA_HEAP=-Xms256m -Xmx256m
+#      - OTEL_RESOURCE_ATTRIBUTES=service.name=kstream-statefullTransform,service.version=1.1,deployment.environment=production
+#      - OTEL_EXPORTER_OTLP_ENDPOINT=${EXPORTER}
+#    volumes:
+#      - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
 
   front:
     image: ianitrix/kafka-apm-example-front:latest
