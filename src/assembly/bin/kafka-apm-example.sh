@@ -47,4 +47,4 @@ do
 done
 
 # Execute
-java ${JAVA_OPTION} -cp ${classpath} org.ianitrix.kafka.apm.example.Main ${config_file}
+exec java ${JAVA_OPTION} ${JAVA_HEAP} -cp ${classpath} org.ianitrix.kafka.apm.example.Main ${config_file}
