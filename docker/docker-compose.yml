@@ -456,19 +456,19 @@ services:
       - ./connectorTrace4.json:/body.json:ro
 
 
-  kstream-stateless-2-6:
-    image: ianitrix/kafka-apm-example:2.6
+  kstream-stateless-2-8:
+    image: ianitrix/kafka-apm-example:2.8
     restart: always
-    hostname: kstream-stateless-2-6
-    container_name: kstream-stateless-2-6
+    hostname: kstream-stateless-2-8
+    container_name: kstream-stateless-2-8
     networks:
       - elastic
     environment:
       KAFKATRACE_bootstrap_servers: kafka-1:9092
       KAFKATRACE_mode: map
-      KAFKATRACE_application_id: kstream-stateless-2-6
+      KAFKATRACE_application_id: kstream-stateless-2-8
       JAVA_OPTION: "-javaagent:/opentelemetry-javaagent-all.jar"
-      OTEL_RESOURCE_ATTRIBUTES: "service.name=kstream-stateless-2-6,service.version=1.1,deployment.environment=production"
+      OTEL_RESOURCE_ATTRIBUTES: "service.name=kstream-stateless-2-8,service.version=1.1,deployment.environment=production"
       OTEL_EXPORTER_OTLP_ENDPOINT: "${EXPORTER}"  
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
@@ -492,19 +492,19 @@ services:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
 
 
-  kstream-statefull-join-2-6:
-    image: ianitrix/kafka-apm-example:2.6
+  kstream-statefull-join-2-8:
+    image: ianitrix/kafka-apm-example:2.8
     restart: always
-    hostname: kstream-statefullJoin-2-6
-    container_name: kstream-statefullJoin-2-6
+    hostname: kstream-statefullJoin-2-8
+    container_name: kstream-statefullJoin-2-8
     networks:
       - elastic
     environment:
       KAFKATRACE_bootstrap_servers: kafka-1:9092
       KAFKATRACE_mode: join
-      KAFKATRACE_application_id: kstream-statefullJoin-2-6
+      KAFKATRACE_application_id: kstream-statefullJoin-2-8
       JAVA_OPTION: "-javaagent:/opentelemetry-javaagent-all.jar"
-      OTEL_RESOURCE_ATTRIBUTES: "service.name=kstream-statefullJoin-2-6,service.version=1.1,deployment.environment=production"
+      OTEL_RESOURCE_ATTRIBUTES: "service.name=kstream-statefullJoin-2-8,service.version=1.1,deployment.environment=production"
       OTEL_EXPORTER_OTLP_ENDPOINT: "${EXPORTER}"
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
@@ -544,6 +544,16 @@ services:
       OTEL_EXPORTER_OTLP_ENDPOINT: "${EXPORTER}"
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
+
+  front:
+    image: ianitrix/kafka-apm-example-front:latest
+    restart: always
+    hostname: front
+    container_name: front
+    networks:
+      - elastic      
+    ports:
+      - "4200:4200"
 
 volumes:
   esdata:
