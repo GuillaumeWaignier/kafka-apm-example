@@ -17,6 +17,12 @@ public class StatefullJoinTopology {
         final KTable<String, String> input2 = builder.table("test1", Consumed.with(Serdes.String(), Serdes.String()));
 
         final KStream<String, String> joined = input1.selectKey((k, v) -> v)
+                .mapValues( s -> {
+                    if ("error".equals(s)) {
+                        throw new NullPointerException();
+                    }
+                    return s;
+                })
                 .leftJoin(input2, (v1, v2) -> "{\"id\":\"" + v1 + "\"}", Joined.with(Serdes.String(), Serdes.String(), Serdes.String()));
         joined.to("test_json_kstream_statefullJoin", Produced.with(Serdes.String(),Serdes.String()));
 
