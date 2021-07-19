@@ -92,3 +92,22 @@ However, we cannot see the indexation inside Elasticsearch.
 ![kafka-apm-example](doc/apm-elastic-join.png "Simple jaeger")
 
 The same with elastic.
+
+# Test with angular front
+
+![kafka-apm-example](doc/kafka-apm-example-front.png "Architecture")
+
+A Producer1 sends traces inside a Kafka topic named _test1_.
+A user uses the front [http://localhost:4200](http://localhost:4200) to call a [AKHQ](http://localhost:8080) API that produce message into Kafka topic named _test2_.
+
+![kafka-apm-example](doc/trace-front.png "trace")
+
+We can see the full trace from the front to kafka connect.
+We can also link with the log produce in the backend.
+
+![kafka-apm-example](doc/log.png "log")
+
+And the real user experience
+
+![kafka-apm-example](doc/rum.png "rum")
+
