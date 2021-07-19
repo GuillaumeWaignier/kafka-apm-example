@@ -2,12 +2,24 @@
 <!DOCTYPE xml>
 <configuration>
     <variable name="LOG_LEVEL" value="${LOG_LEVEL:-INFO}" />
+
+    <!--
     <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger - %msg%n</pattern>
+            <pattern>%d{HH:mm:ss.SSS} [%thread] %-5level %logger traceId: %X{trace_id} spanId: %X{span_id} - %msg%n</pattern>
         </encoder>
     </appender>
+-->
 
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+            <timeZone>CET</timeZone>
+            <mdcKeyFieldName>trace_id=traceId</mdcKeyFieldName>
+            <mdcKeyFieldName>span_id=spanId</mdcKeyFieldName>
+            <includeMdcKeyName>trace_id</includeMdcKeyName>
+            <includeMdcKeyName>span_id</includeMdcKeyName>
+        </encoder>
+    </appender>
 
     <logger name="org.ianitrix.kafka" level="${LOG_LEVEL}"/>
 

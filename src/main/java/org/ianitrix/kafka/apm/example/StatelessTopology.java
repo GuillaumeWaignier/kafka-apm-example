@@ -12,7 +12,10 @@ public class StatelessTopology {
 
         final StreamsBuilder builder = new StreamsBuilder();
         final KStream<String, String> input = builder.stream("test3");
-        final KStream<String,String> json = input.mapValues(s -> "{\"id\":\"" + s + "\"}");
+        final KStream<String,String> json = input.mapValues(s -> {
+            log.info("Handle message " + s);
+            return "{\"id\":\"" + s + "\"}";
+        });
         json.to("test_json_kstream_stateless");
 
         return builder.build();

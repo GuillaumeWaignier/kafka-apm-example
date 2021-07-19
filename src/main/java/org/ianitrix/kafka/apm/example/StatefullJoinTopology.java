@@ -19,8 +19,11 @@ public class StatefullJoinTopology {
         final KStream<String, String> joined = input1.selectKey((k, v) -> v)
                 .mapValues( s -> {
                     if ("error".equals(s)) {
-                        throw new NullPointerException();
+                        final NullPointerException e = new NullPointerException();
+                        log.error("Error produce with 'error' message received in topic2", e);
+                        throw e;
                     }
+                    log.info("Handle message " + s);
                     return s;
                 })
                 .leftJoin(input2, (v1, v2) -> "{\"id\":\"" + v1 + "\"}", Joined.with(Serdes.String(), Serdes.String(), Serdes.String()));
