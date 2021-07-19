@@ -9,7 +9,11 @@ import { Component } from '@angular/core';
 export class AppComponent {
   title = 'front';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    setInterval(() => {
+      (this as any).notExistedObj.notExistedProp = 'will throw null reference exception';
+    }, 5000);
+  }
 
   generateFrontEndError() {
     throw new Error('Front End Error');
@@ -17,7 +21,13 @@ export class AppComponent {
 
   postHttp() {
     this.http.post('http://localhost:8080/api/docker-kafka-server/topic/test2/data',
-    {"clusterId":"docker-kafka-server","topicId":"test2","partition":0,"key":"","timestamp": new Date().toISOString,"value":"tototot","keySchema":"","valueSchema":"","headers":{"":""}})
+    {"clusterId":"docker-kafka-server","topicId":"test2","partition":0,"key":"","timestamp": new Date().toISOString,"value":"toto","keySchema":"","valueSchema":"","headers":{"":""}})
+    .subscribe();
+  }
+
+  postHttpError() {
+    this.http.post('http://localhost:8080/api/docker-kafka-server/topic/test2/data',
+    {"clusterId":"docker-kafka-server","topicId":"test2","partition":0,"key":"","timestamp": new Date().toISOString,"value":"error","keySchema":"","valueSchema":"","headers":{"":""}})
     .subscribe();
   }
 
