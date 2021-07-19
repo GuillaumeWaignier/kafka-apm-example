@@ -9,7 +9,11 @@ import { Component } from '@angular/core';
 export class AppComponent {
   title = 'front';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) {
+    setInterval(() => {
+      (this as any).notExistedObj.notExistedProp = 'will throw null reference exception';
+    }, 5000);
+  }
 
   generateFrontEndError() {
     throw new Error('Front End Error');
