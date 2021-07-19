@@ -244,9 +244,6 @@ services:
     user: root
     networks:
       - elastic
-    configs:
-      - source: fb_config
-        target: /usr/share/filebeat/filebeat.yml
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/lib/docker/containers/:/var/lib/docker/containers/:ro
@@ -257,7 +254,7 @@ services:
     command: ["--strict.perms=false"]
     restart: on-failure
 
-# Jaeger
+# OTEL
   otel-collector:
     image: otel/opentelemetry-collector:${OTEL_VERSION}
     command: ["--config=/etc/otel-collector-config.yaml"]
@@ -266,6 +263,7 @@ services:
       - ./otel_collector.yml:/etc/otel-collector-config.yaml
     ports:
       - "4317"        # OTLP gRPC receiver
+      - "8889:8889"   # Prometheus
     depends_on:
       - kafka-1
     networks:
@@ -583,6 +581,46 @@ services:
       - elastic      
     ports:
       - "4200:4200"
+    healthcheck:
+      interval: 10s
+      retries: 20
+      test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:4200
+
+  deploy-sourcemap-main:
+    image: "curlimages/curl:7.69.0"
+    hostname: curl
+    entrypoint:
+      - "/uploadSourceMap.sh"
+    environment:
+      - APM=http://apm-server:8200
+      - FRONT=http://front:4200
+      - FILE=main.37e1282b24f3ff3cfba4.js
+    depends_on:
+      - apm-server
+      - front
+    networks:
+      - elastic
+    restart: on-failure
+    volumes:
+      - ./uploadSourceMap.sh:/uploadSourceMap.sh:ro
+
+  deploy-sourcemap-polyfills:
+    image: "curlimages/curl:7.69.0"
+    hostname: curl
+    entrypoint:
+      - "/uploadSourceMap.sh"
+    environment:
+      - APM=http://apm-server:8200
+      - FRONT=http://front:4200
+      - FILE=polyfills.a6d94ff5c7441bee20f9.js
+    depends_on:
+      - apm-server
+      - front
+    networks:
+      - elastic
+    restart: on-failure
+    volumes:
+      - ./uploadSourceMap.sh:/uploadSourceMap.sh:ro
 
 volumes:
   esdata:

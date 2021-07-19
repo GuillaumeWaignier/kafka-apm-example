@@ -26,6 +26,7 @@ export class AppModule {
   constructor(apmService: ApmService) {
     const apm = apmService.init({
       serviceName: 'angular-app',
+      serviceVersion: '1.0.0',
       serverUrl: 'http://localhost:8200',
       environment: 'production',
       propagateTracestate: true,
