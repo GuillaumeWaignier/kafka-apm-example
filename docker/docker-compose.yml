@@ -330,6 +330,24 @@ services:
     networks:
       - elastic
 
+  # Prometheus
+  prometheus:
+    image: prom/prometheus:${PROMETHEUS_VERSION}
+    volumes:
+      - ./prometheus.yml:/prometheus.yml:ro
+    command:
+      - '--config.file=/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--web.console.libraries=/etc/prometheus/console_libraries'
+      - '--web.console.templates=/etc/prometheus/consoles'
+      - '--storage.tsdb.retention.time=200h'
+      - '--web.enable-lifecycle'
+    restart: on-failure
+    ports:
+     - "9090:9090"
+    networks:
+      - elastic
+
 # Load data
   load-data-p1:
     image: "ianitrix/kafka:${CONFLUENT_VERSION}"
@@ -570,6 +588,40 @@ services:
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
 
+
+  kstream-billing-join-2-8:
+    image: ianitrix/kafka-apm-example:2.8
+    restart: always
+    hostname: kstream-billing-join-2-8
+    container_name: kstream-billing-join-2-8
+    networks:
+      - elastic
+    environment:
+      - KAFKATRACE_bootstrap_servers=kafka-1:9092
+      - KAFKATRACE_mode=joinBill
+      - KAFKATRACE_application_id=kstream-billing-join-2-8
+      - JAVA_OPTION=-javaagent:/opentelemetry-javaagent-all.jar
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=kstream-billing-join-2-8,service.version=1.1,deployment.environment=production
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${EXPORTER}
+    volumes:
+      - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
+
+  kstream-billing-agg-2-8:
+    image: ianitrix/kafka-apm-example:2.8
+    restart: always
+    hostname: kstream-billing-agg-2-8
+    container_name: kstream-billing-agg-2-8
+    networks:
+      - elastic
+    environment:
+      - KAFKATRACE_bootstrap_servers=kafka-1:9092
+      - KAFKATRACE_mode=aggBill
+      - KAFKATRACE_application_id=kstream-billing-agg-2-8
+      - JAVA_OPTION=-javaagent:/opentelemetry-javaagent-all.jar
+      - OTEL_RESOURCE_ATTRIBUTES=service.name=kstream-billing-agg-2-8,service.version=1.1,deployment.environment=production
+      - OTEL_EXPORTER_OTLP_ENDPOINT=${EXPORTER}
+    volumes:
+      - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
 
 #  kstream-statefull-transform:
 #    image: ianitrix/kafka-apm-example:latest

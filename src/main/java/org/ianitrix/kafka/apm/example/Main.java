@@ -6,6 +6,8 @@ import org.apache.kafka.streams.KafkaStreams;
 import org.apache.kafka.streams.StreamsConfig;
 import org.apache.kafka.streams.Topology;
 import org.apache.kafka.streams.errors.LogAndContinueExceptionHandler;
+import org.ianitrix.kafka.apm.example.billing.JoinPaymentAndInvoiceTopology;
+import org.ianitrix.kafka.apm.example.billing.AggregatePaymentAndInvoiceTopology;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -42,6 +44,12 @@ public class Main {
                 break;
             case "transform":
                 topology = new StatefullTransformTopology().buildStream();
+                break;
+            case "joinBill":
+                topology = new JoinPaymentAndInvoiceTopology().buildStream();
+                break;
+            case "aggBill":
+                topology = new AggregatePaymentAndInvoiceTopology().buildStream();
                 break;
             default:
                 exitWithError("Unknown mode " + mode + " / Possible mode are 'map' or 'join'", new IllegalArgumentException());

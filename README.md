@@ -111,3 +111,16 @@ And the real user experience
 
 ![kafka-apm-example](doc/rum.png "rum")
 
+# Join Invoice and Payment
+
+In a topic _document_ create records as:
+
+For Invoice
+```json
+{"clientId": "123", "documentId": "i1", "type":"invoice"}
+```
+
+For Payment
+```json
+{"clientId": "123", "documentId": "p1", "type":"payment"}
+```
