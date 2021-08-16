@@ -1,15 +1,14 @@
 {
   "name":"connect-test1",
   "config": {
-    "connector.class":"ElasticsearchSinkConnector",
+    "connector.class":"FileStreamSink",
     "name":"connect-test1",
-    "connection.url":"http://elasticsearch:9200",
-    "type.name":"trace",
     "topics":"TEST_JSON_KSQL",
-    "auto.create.indices.at.start": true,
     "key.ignore": "true",
     "schema.ignore":true,
     "errors.tolerance":"none",
-    "errors.retry.timeout":-1
+    "errors.retry.timeout":-1,
+    "file":"/tmp/test1.txt",
+    "consumer.override.sasl.jaas.config":"org.apache.kafka.common.security.scram.ScramLoginModule required username=admin password=admin-secret;"
   }
 }

@@ -2,6 +2,11 @@ receivers:
   kafka:
     brokers:
       - kafka-1:9092
+    auth:
+      sasl:
+        username: admin
+        password: admin-secret
+        mechanism: SCRAM-SHA-512
     topic: oltp_spans
   
 exporters:

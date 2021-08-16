@@ -1,16 +1,15 @@
 {
   "name":"connect-agg-doc",
   "config": {
-    "connector.class":"ElasticsearchSinkConnector",
+    "connector.class":"FileStreamSink",
     "name":"connect-agg-doc",
-    "connection.url":"http://elasticsearch:9200",
-    "type.name":"trace",
     "topics":"fusionAggDoc",
-    "auto.create.indices.at.start": true,
     "key.ignore": "true",
     "schema.ignore":true,
     "errors.tolerance":"none",
     "errors.retry.timeout":-1,
-    "key.converter": "org.apache.kafka.connect.storage.StringConverter"
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "file":"/tmp/testAggDoc.txt",
+    "consumer.override.sasl.jaas.config":"org.apache.kafka.common.security.scram.ScramLoginModule required username=admin  password=admin-secret;"
   }
 }

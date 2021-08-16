@@ -1,16 +1,15 @@
 {
   "name":"connect-join-doc",
   "config": {
-    "connector.class":"ElasticsearchSinkConnector",
+    "connector.class":"FileStreamSink",
     "name":"connect-join-doc",
-    "connection.url":"http://elasticsearch:9200",
-    "type.name":"trace",
     "topics":"fusionJoinDoc",
-    "auto.create.indices.at.start": true,
     "key.ignore": "true",
     "schema.ignore":true,
     "errors.tolerance":"none",
     "errors.retry.timeout":-1,
-    "key.converter": "org.apache.kafka.connect.storage.StringConverter"
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter",
+    "file":"/tmp/testJoinDoc.txt",
+    "consumer.override.sasl.jaas.config":"org.apache.kafka.common.security.scram.ScramLoginModule required username=admin  password=admin-secret;"
   }
 }
