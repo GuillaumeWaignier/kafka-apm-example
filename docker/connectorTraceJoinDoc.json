@@ -1,0 +1,16 @@
+{
+  "name":"connect-join-doc",
+  "config": {
+    "connector.class":"ElasticsearchSinkConnector",
+    "name":"connect-join-doc",
+    "connection.url":"http://elasticsearch:9200",
+    "type.name":"trace",
+    "topics":"fusionJoinDoc",
+    "auto.create.indices.at.start": true,
+    "key.ignore": "true",
+    "schema.ignore":true,
+    "errors.tolerance":"none",
+    "errors.retry.timeout":-1,
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter"
+  }
+}

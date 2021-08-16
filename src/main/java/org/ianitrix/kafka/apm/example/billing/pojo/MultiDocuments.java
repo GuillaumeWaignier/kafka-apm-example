@@ -15,4 +15,5 @@ public class MultiDocuments {
     private String invoiceId;
     private String paymentId;
     private Long price;
+    private String traceParent;
 }

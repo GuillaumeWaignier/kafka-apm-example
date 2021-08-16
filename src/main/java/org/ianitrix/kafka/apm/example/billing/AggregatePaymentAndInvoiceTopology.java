@@ -13,6 +13,7 @@ import org.apache.kafka.streams.state.KeyValueStore;
 import org.apache.kafka.streams.state.Stores;
 import org.ianitrix.kafka.apm.example.billing.pojo.Document;
 import org.ianitrix.kafka.apm.example.billing.pojo.MultiDocuments;
+import org.ianitrix.kafka.apm.example.billing.pojo.SetTraceHeaderTransformer;
 
 import java.time.Duration;
 
@@ -25,7 +26,8 @@ public class AggregatePaymentAndInvoiceTopology {
     public Topology buildStream() {
 
         final StreamsBuilder builder = new StreamsBuilder();
-        final KStream<String, Document> documentStream = builder.stream("document", Consumed.with(Serdes.String(), documentSerde).withName("input"));
+        final KStream<String, Document> documentStream = builder.stream("document", Consumed.with(Serdes.String(), documentSerde).withName("input"))
+                .transformValues(() -> new ExtractTraceHeaderTransformer());
         documentStream.foreach((k,v) -> log.error("################" +  v.toString()));
 
         final KGroupedStream<String, Document> groupedStreamByClientId = documentStream.groupBy((k, v) -> v.getClientId(), Grouped.with(Serdes.String(), documentSerde).withName("groupBy"));
@@ -38,9 +40,10 @@ public class AggregatePaymentAndInvoiceTopology {
                 Materialized.<String,MultiDocuments>as(Stores.persistentWindowStore("agg",Duration.ofSeconds(30), Duration.ofSeconds(30),false)).withKeySerde(Serdes.String()).withValueSerde(multiDocSerde));
 
 
-        final KStream<String, MultiDocuments> result = groupBillPayment.suppress(Suppressed.untilWindowCloses(Suppressed.BufferConfig.unbounded()).withName("supress"))
+        final KStream<String, MultiDocuments> result = groupBillPayment//.suppress(Suppressed.untilWindowCloses(Suppressed.BufferConfig.unbounded()).withName("supress"))
                 .toStream()
-                .map((k, v) -> KeyValue.pair(k.key(), v));
+                .map((k, v) -> KeyValue.pair(k.key(), v))
+                .transformValues(() -> new SetTraceHeaderTransformer());
 
         result.foreach((k,v) -> log.error("################" +  v.toString()));
         result.to("fusionAggDoc", Produced.with(Serdes.String(), multiDocSerde).withName("out"));
@@ -54,6 +57,7 @@ public class AggregatePaymentAndInvoiceTopology {
         } else {
             oldValue.setPaymentId(newValue.getDocumentId());
         }
+        oldValue.setTraceParent(newValue.getTraceParent());
         return oldValue;
     }
 }

@@ -15,4 +15,5 @@ public class Document {
     private String documentId;
     private String type;
     private Long price;
+    private String traceParent;
 }

@@ -51,6 +51,9 @@ public class Main {
             case "aggBill":
                 topology = new AggregatePaymentAndInvoiceTopology().buildStream();
                 break;
+            case "agg":
+                topology = new StatefullAggTopology().buildStream();
+                break;
             default:
                 exitWithError("Unknown mode " + mode + " / Possible mode are 'map' or 'join'", new IllegalArgumentException());
         }

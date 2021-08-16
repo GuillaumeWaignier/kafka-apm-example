@@ -1,5 +1,6 @@
 package org.ianitrix.kafka.apm.example.billing;
 
+import lombok.Value;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.kafka.common.serialization.Serde;
 import org.apache.kafka.common.serialization.Serdes;
@@ -24,7 +25,8 @@ public class JoinPaymentAndInvoiceTopology {
         final StreamsBuilder builder = new StreamsBuilder();
         final KStream<String, Document> documentStream = builder.stream("document", Consumed.with(Serdes.String(), documentSerde).withName("input"));
 
-        final KStream<String, Document> input = documentStream.selectKey((k, v) -> v.getClientId(), Named.as("clientIdAsKey"));
+        final KStream<String, Document> input = documentStream.selectKey((k, v) -> v.getClientId(), Named.as("clientIdAsKey"))
+                .transformValues(() -> new ExtractTraceHeaderTransformer());
 
         input.foreach((k,v) -> log.error("################" +  v.toString()));
 
@@ -45,6 +47,6 @@ public class JoinPaymentAndInvoiceTopology {
     }
 
     private MultiDocuments fusion(final Document invoice, final Document payment) {
-        return MultiDocuments.builder().invoiceId(invoice.getDocumentId()).paymentId(payment.getDocumentId()).build();
+        return MultiDocuments.builder().invoiceId(invoice.getDocumentId()).paymentId(payment.getDocumentId()).traceParent(invoice.getTraceParent()).build();
     }
 }

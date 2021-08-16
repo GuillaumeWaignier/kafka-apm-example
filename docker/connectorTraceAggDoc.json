@@ -1,11 +1,11 @@
 {
-  "name":"connect-test4",
+  "name":"connect-agg-doc",
   "config": {
     "connector.class":"ElasticsearchSinkConnector",
-    "name":"connect-test4",
+    "name":"connect-agg-doc",
     "connection.url":"http://elasticsearch:9200",
     "type.name":"trace",
-    "topics":"test_json_kstream_statefullTransform",
+    "topics":"fusionAggDoc",
     "auto.create.indices.at.start": true,
     "key.ignore": "true",
     "schema.ignore":true,

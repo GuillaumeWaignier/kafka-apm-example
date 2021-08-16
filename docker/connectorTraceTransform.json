@@ -1,0 +1,16 @@
+{
+  "name":"connect-transform",
+  "config": {
+    "connector.class":"ElasticsearchSinkConnector",
+    "name":"connect-transform",
+    "connection.url":"http://elasticsearch:9200",
+    "type.name":"trace",
+    "topics":"test_json_kstream_statefullTransform",
+    "auto.create.indices.at.start": true,
+    "key.ignore": "true",
+    "schema.ignore":true,
+    "errors.tolerance":"none",
+    "errors.retry.timeout":-1,
+    "key.converter": "org.apache.kafka.connect.storage.StringConverter"
+  }
+}
