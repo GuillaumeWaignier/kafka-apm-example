@@ -772,7 +772,7 @@ services:
     environment:
       - APM=http://apm-server:8200
       - FRONT=http://front:4200
-      - FILE=main.b305e57a9e0eaa346468.js.map
+      - FILE=main.b305e57a9e0eaa346468.js
     depends_on:
       - apm-server
       - front
