@@ -149,7 +149,7 @@ services:
       - KSQL_KSQL_QUERIES_FILE=/ksql.txt
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
-      - ./ksql.txt:/ksql.txt:ro
+      - ./data/ksql.txt:/ksql.txt:ro
     depends_on:
       - kafka-1
 
@@ -258,7 +258,7 @@ services:
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - /var/lib/docker/containers/:/var/lib/docker/containers/:ro
-      - ./filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
+      - ./config/filebeat.yml:/usr/share/filebeat/filebeat.yml:ro
     environment:
       - ELASTICSEARCH_HOST=http://elasticsearch:9200
       - KIBANA_HOST=kibana
@@ -275,7 +275,7 @@ services:
       - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
       - /:/hostfs:ro
       - /var/run/docker.sock:/var/run/docker.sock
-      - ./metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro
+      - ./config/metricbeat.yml:/usr/share/metricbeat/metricbeat.yml:ro
     environment:
       - ELASTICSEARCH_HOST=http://elasticsearch:9200
       - KIBANA_HOST=kibana
@@ -288,7 +288,7 @@ services:
     command: ["--config=/etc/otel-collector-config.yaml"]
     restart: on-failure
     volumes:
-      - ./otel_collector.yml:/etc/otel-collector-config.yaml
+      - ./config/otel_collector.yml:/etc/otel-collector-config.yaml
     ports:
       - "4317"        # OTLP gRPC receiver
       - "8889:8889"   # Prometheus
@@ -302,7 +302,7 @@ services:
     command: ["--config=/etc/otel-collector-config.yaml"]
     restart: on-failure
     volumes:
-      - ./otel_ingester.yml:/etc/otel-collector-config.yaml
+      - ./config/otel_ingester.yml:/etc/otel-collector-config.yaml
     depends_on:
       - kafka-1
       - elasticsearch
@@ -345,7 +345,7 @@ services:
   prometheus:
     image: prom/prometheus:${PROMETHEUS_VERSION}
     volumes:
-      - ./prometheus.yml:/prometheus.yml:ro
+      - ./config/prometheus.yml:/prometheus.yml:ro
     command:
       - '--config.file=/prometheus.yml'
       - '--storage.tsdb.path=/prometheus'
@@ -373,7 +373,7 @@ services:
     entrypoint: "kafka-producer-perf-test --topic test1 --num-records 1000000 --throughput ${THROUGHPUT} --record-size 100 --producer.config /kafka.config"
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
-      - ./kafka.config:/kafka.config:ro
+      - ./config/kafka.config:/kafka.config:ro
     restart: on-failure
 
   load-data-p2:
@@ -389,7 +389,7 @@ services:
     entrypoint: "kafka-producer-perf-test --topic test2 --num-records 1000000 --throughput ${THROUGHPUT} --record-size 100 --producer.config /kafka.config --producer-props client.id=producer2"
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
-      - ./kafka.config:/kafka.config:ro
+      - ./config/kafka.config:/kafka.config:ro
     restart: on-failure
 
   load-data-p3:
@@ -405,7 +405,7 @@ services:
     entrypoint: "kafka-producer-perf-test --topic test3 --num-records 1000000 --throughput ${THROUGHPUT} --record-size 100 --producer.config /kafka.config --producer-props client.id=producer3"
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
-      - ./kafka.config:/kafka.config:ro
+      - ./config/kafka.config:/kafka.config:ro
     restart: on-failure
 
   load-data-p4:
@@ -421,7 +421,7 @@ services:
     entrypoint: "kafka-producer-perf-test --topic test4 --num-records 1000000 --throughput ${THROUGHPUT} --record-size 100 --producer.config /kafka.config --producer-props client.id=producer4"
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
-      - ./kafka.config:/kafka.config:ro
+      - ./config/kafka.config:/kafka.config:ro
     restart: on-failure
 
 
@@ -438,7 +438,7 @@ services:
     entrypoint: "kafka-console-consumer --topic test1 --from-beginning  --bootstrap-server kafka-1:9092 --consumer.config /kafka.config --consumer-property client.id=myConsumer1 --group=myGroup1"
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
-      - ./kafka.config:/kafka.config:ro
+      - ./config/kafka.config:/kafka.config:ro
     restart: on-failure
 
   consume-data-c2:
@@ -454,7 +454,7 @@ services:
     entrypoint: "kafka-console-consumer --topic test1 --from-beginning --bootstrap-server kafka-1:9092 --consumer.config /kafka.config --consumer-property client.id=myConsumer2 --group=myGroup2"
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
-      - ./kafka.config:/kafka.config:ro
+      - ./config/kafka.config:/kafka.config:ro
     restart: on-failure
 
   load-es-connector-trace:
@@ -472,8 +472,8 @@ services:
       - elastic
     restart: on-failure
     volumes:
-      - ./deployConnector.sh:/deployConnector.sh:ro
-      - ./connectorTrace.json:/body.json:ro
+      - ./script/deployConnector.sh:/deployConnector.sh:ro
+      - ./data/connectorTrace.json:/body.json:ro
 
   load-es-connector-trace2:
     image: "curlimages/curl:7.69.0"
@@ -490,8 +490,8 @@ services:
       - elastic
     restart: on-failure
     volumes:
-      - ./deployConnector.sh:/deployConnector.sh:ro
-      - ./connectorTrace2.json:/body.json:ro
+      - ./script/deployConnector.sh:/deployConnector.sh:ro
+      - ./data/connectorTrace2.json:/body.json:ro
 
   load-es-connector-trace3:
     image: "curlimages/curl:7.69.0"
@@ -508,8 +508,8 @@ services:
       - elastic
     restart: on-failure
     volumes:
-      - ./deployConnector.sh:/deployConnector.sh:ro
-      - ./connectorTrace3.json:/body.json:ro
+      - ./script/deployConnector.sh:/deployConnector.sh:ro
+      - ./data/connectorTrace3.json:/body.json:ro
 
   load-es-connector-aggDoc-doc:
     image: "curlimages/curl:7.69.0"
@@ -526,8 +526,8 @@ services:
       - elastic
     restart: on-failure
     volumes:
-      - ./deployConnector.sh:/deployConnector.sh:ro
-      - ./connectorTraceAggDoc.json:/body.json:ro
+      - ./script/deployConnector.sh:/deployConnector.sh:ro
+      - ./data/connectorTraceAggDoc.json:/body.json:ro
 
   load-es-connector-joinDoc-doc:
     image: "curlimages/curl:7.69.0"
@@ -544,8 +544,8 @@ services:
       - elastic
     restart: on-failure
     volumes:
-      - ./deployConnector.sh:/deployConnector.sh:ro
-      - ./connectorTraceJoinDoc.json:/body.json:ro
+      - ./script/deployConnector.sh:/deployConnector.sh:ro
+      - ./data/connectorTraceJoinDoc.json:/body.json:ro
 
   load-es-connector-agg-doc:
     image: "curlimages/curl:7.69.0"
@@ -562,8 +562,8 @@ services:
       - elastic
     restart: on-failure
     volumes:
-      - ./deployConnector.sh:/deployConnector.sh:ro
-      - ./connectorTraceAgg.json:/body.json:ro
+      - ./script/deployConnector.sh:/deployConnector.sh:ro
+      - ./data/connectorTraceAgg.json:/body.json:ro
 
   load-es-connector-transform-doc:
     image: "curlimages/curl:7.69.0"
@@ -580,8 +580,8 @@ services:
       - elastic
     restart: on-failure
     volumes:
-      - ./deployConnector.sh:/deployConnector.sh:ro
-      - ./connectorTraceTransform.json:/body.json:ro
+      - ./script/deployConnector.sh:/deployConnector.sh:ro
+      - ./data/connectorTraceTransform.json:/body.json:ro
 
   kstream-stateless-2-8:
     image: ianitrix/kafka-apm-example:2.8
@@ -780,7 +780,7 @@ services:
       - elastic
     restart: on-failure
     volumes:
-      - ./uploadSourceMap.sh:/uploadSourceMap.sh:ro
+      - ./script/uploadSourceMap.sh:/uploadSourceMap.sh:ro
 
   deploy-sourcemap-polyfills:
     image: "curlimages/curl:7.69.0"
@@ -798,7 +798,23 @@ services:
       - elastic
     restart: on-failure
     volumes:
-      - ./uploadSourceMap.sh:/uploadSourceMap.sh:ro
+      - ./script/uploadSourceMap.sh:/uploadSourceMap.sh:ro
+
+  load-kibana-dashboard:
+    image: "curlimages/curl:7.69.0"
+    hostname: curl
+    entrypoint:
+      - "/deployDashboard.sh"
+      - "http://kibana:5601"
+      - "/kibana.ndjson"
+    depends_on:
+      - kibana
+    networks:
+      - elastic
+    restart: on-failure
+    volumes:
+      - ./script/deployDashboard.sh:/deployDashboard.sh:ro
+      - ./data/kibana.ndjson:/kibana.ndjson:ro
 
 volumes:
   esdata:
