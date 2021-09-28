@@ -284,7 +284,7 @@ services:
 
 # OTEL
   otel-collector:
-    image: otel/opentelemetry-collector:${OTEL_VERSION}
+    image: otel/opentelemetry-collector-contrib:${OTEL_VERSION}
     command: ["--config=/etc/otel-collector-config.yaml"]
     restart: on-failure
     volumes:

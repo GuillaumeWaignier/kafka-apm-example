@@ -12,9 +12,12 @@ receivers:
 exporters:
   jaeger:
     endpoint: jaeger-collector:14250
-    insecure: true
-  elastic:
-      apm_server_url: "http://apm-server:8200"
+    tls:
+      insecure: true
+  otlp/elastic:
+    endpoint: "http://apm-server:8200"
+    tls:
+      insecure: true
       
 processors:
   batch:
@@ -24,5 +27,5 @@ service:
     traces:
       receivers: [kafka]
       processors: [batch]
-      exporters: [jaeger,"elastic"]
+      exporters: [jaeger,"otlp/elastic"]
  
