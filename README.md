@@ -6,7 +6,7 @@ Example of APM for Kafka
 
 > Use version **1.9.1** of OpenTelemetry agent.
 
-You need to had the Java option *-Dotel.instrumentation.common.experimental.suppress-messaging-receive-spans=true*
+You need to had the Java option *-Dotel.instrumentation.common.experimental.suppress-messaging-receive-spans=true* (see [github issue](https://github.com/open-telemetry/opentelemetry-java-instrumentation/discussions/4509))
 
 
 # Architecture of collect
