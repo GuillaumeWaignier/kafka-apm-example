@@ -4,6 +4,8 @@
 
 Example of APM for Kafka
 
+> Use version **1.9.1** of OpenTelemetry agent
+
 
 # Architecture of collect
 
@@ -37,90 +39,3 @@ However, the trace is lost after the KSQL process.
 ![kafka-apm-example](doc/apm-elastic-simple.png "Simple jaeger")
 
 We have the same with elastic.
-
-# Test with API
-
-
-![kafka-apm-example](doc/kafka-apm-example-exemple-api.png "Simple")
-
-In this example, the kafka's records are sent with a REST API.
-The consumption is the same as previous example.
-
-![kafka-apm-example](doc/apm-jaeger-api.png "Simple jaeger")
-
-With Jaeger, we see the trace between the POST REST api call and the production into kafka topic.
-
-![kafka-apm-example](doc/apm-elastic-api.png "Simple jaeger")
-
-The same with elastic.
-
-# Test with a stateless kstream
-
-![kafka-apm-example](doc/kafka-apm-example-kstream-stateless.png "Architecture")
-
-A Producer sends traces inside a Kafka topic named _test3_.
-A stateless kafka kstream (a simple _map_) convert the string record into json record and produces them inside a topic named _test_json_kstream_stateless_.
-A kafka connect (connector Elasticsearch) consumes this topic and send records inside Elasticsearch.
-
-![kafka-apm-example](doc/apm-jaeger-map.png "Simple jaeger")
-
-With Jaeger, we follow the traces through the kafka stream.
-We can also see the consumption by kafka connect.
-However, we cannot see the indexation inside Elasticsearch.
-
-![kafka-apm-example](doc/apm-elastic-map.png "Simple jaeger")
-
-The same with elastic.
-
-# Test with a statefull (join) kstream
-
-![kafka-apm-example](doc/kafka-apm-example-kstream-statefull.png "Architecture")
-
-A Producer1 sends traces inside a Kafka topic named _test1_.
-A second Producer2 sends traces inside a Kafka topic named _test2_.
-
-A statefull kafka kstream joins the topic _test2_ (a KStream) with the _topic1_ (a KTable).
-The result is produced into a topic named _test_json_kstream_statefullJoin_.
-A kafka connect (connector Elasticsearch) consumes this topic and send records inside Elasticsearch.
-
-![kafka-apm-example](doc/apm-jaeger-join.png "Simple jaeger")
-
-With Jaeger, we follow the traces that come from _topic2_ through the kafka stream topology.
-We can also see the consumption by kafka connect.
-However, we cannot see the indexation inside Elasticsearch.
-
-![kafka-apm-example](doc/apm-elastic-join.png "Simple jaeger")
-
-The same with elastic.
-
-# Test with angular front
-
-![kafka-apm-example](doc/kafka-apm-example-front.png "Architecture")
-
-A Producer1 sends traces inside a Kafka topic named _test1_.
-A user uses the front [http://localhost:4200](http://localhost:4200) to call a [AKHQ](http://localhost:8080) API that produce message into Kafka topic named _test2_.
-
-![kafka-apm-example](doc/trace-front.png "trace")
-
-We can see the full trace from the front to kafka connect.
-We can also link with the log produce in the backend.
-
-![kafka-apm-example](doc/log.png "log")
-
-And the real user experience
-
-![kafka-apm-example](doc/rum.png "rum")
-
-# Join Invoice and Payment
-
-In a topic _document_ create records as:
-
-For Invoice
-```json
-{"clientId": "123", "documentId": "i1", "type":"invoice"}
-```
-
-For Payment
-```json
-{"clientId": "123", "documentId": "p1", "type":"payment"}
-```
