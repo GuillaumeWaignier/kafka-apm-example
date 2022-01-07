@@ -4,8 +4,7 @@
 
 Example of APM for Kafka
 
-> Use version **1.9.1** of OpenTelemetry agent
-
+> Use version **1.9.1** of OpenTelemetry agent (kafka tracing not working)
 
 # Architecture of collect
 
@@ -33,8 +32,8 @@ CREATE STREAM test_json_ksql WITH(VALUE_FORMAT='json') AS SELECT * FROM json;
 ```
 ![kafka-apm-example](doc/apm-jaeger-simple.png "Simple jaeger")
 
-With Jaeger, we can trace the records between producer and consumer.
-However, the trace is lost after the KSQL process.
+With Jaeger, we have no trace between the producer and the consumer.
+
 
 ![kafka-apm-example](doc/apm-elastic-simple.png "Simple jaeger")
 
