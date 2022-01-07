@@ -36,7 +36,7 @@ CREATE STREAM test_json_ksql WITH(VALUE_FORMAT='json') AS SELECT * FROM json;
 ![kafka-apm-example](doc/apm-jaeger-simple.png "Simple jaeger")
 
 With Jaeger, we can trace the records between producer and consumer.
-However, the trace is lost after the KSQL process.
+We also have the trace after the KSQL process (there were lost with the otel agent in version 1.5.3).
 
 ![kafka-apm-example](doc/apm-elastic-simple.png "Simple jaeger")
 
