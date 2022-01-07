@@ -126,7 +126,7 @@ services:
 
 
   ksql:
-    image: confluentinc/ksqldb-server:0.18.0
+    image: confluentinc/ksqldb-server:${KSQLDB_VERSION}
     restart: always
     hostname: ksql
     container_name: ksql
@@ -154,7 +154,7 @@ services:
       - kafka-1
 
   akhq:
-    image: tchiotludo/akhq:0.16.0
+    image: tchiotludo/akhq:${AKHQ_VERSION}
     environment:
      OTEL_RESOURCE_ATTRIBUTES: "service.name=akhq,service.version=1.1,deployment.environment=production"
      OTEL_EXPORTER_OTLP_ENDPOINT: "${EXPORTER}"
