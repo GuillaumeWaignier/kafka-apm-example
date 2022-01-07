@@ -1,7 +1,7 @@
 version: '3.7'
 services:
 
-# Confluent kafka stack
+  # Confluent kafka stack
   zk-1:
     image: ianitrix/kafka:${CONFLUENT_VERSION}
     command: zookeeper-server-start
@@ -120,13 +120,13 @@ services:
       - KAFKA_log4j_root_loglevel=INFO
       - KAFKA_log4j_loggers=org.reflections=ERROR
       - KAFKA_connector_client_config_override_policy=All
-    restart: on-failure  
+    restart: on-failure
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
 
 
   ksql:
-    image: confluentinc/ksqldb-server:0.18.0
+    image: confluentinc/ksqldb-server:${KSQLDB_VERSION}
     restart: always
     hostname: ksql
     container_name: ksql
@@ -154,12 +154,12 @@ services:
       - kafka-1
 
   akhq:
-    image: tchiotludo/akhq:0.16.0
+    image: tchiotludo/akhq:${AKHQ_VERSION}
     environment:
-     OTEL_RESOURCE_ATTRIBUTES: "service.name=akhq,service.version=1.1,deployment.environment=production"
-     OTEL_EXPORTER_OTLP_ENDPOINT: "${EXPORTER}"
-     JAVA_OPTS: "-javaagent:/opentelemetry-javaagent-all.jar -Xms256m -Xmx256m" 
-     AKHQ_CONFIGURATION: |
+      OTEL_RESOURCE_ATTRIBUTES: "service.name=akhq,service.version=1.1,deployment.environment=production"
+      OTEL_EXPORTER_OTLP_ENDPOINT: "${EXPORTER}"
+      JAVA_OPTS: "-javaagent:/opentelemetry-javaagent-all.jar -Xms256m -Xmx256m"
+      AKHQ_CONFIGURATION: |
         micronaut:
          server:
            cors:
@@ -178,14 +178,14 @@ services:
                 - name: connect
                   url: "http://kafka-connect:8083"
     ports:
-    - 8080:8080
+      - 8080:8080
     networks:
-    - elastic
+      - elastic
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
 
 
-# Elastic stack
+  # Elastic stack
   apm-server:
     image: docker.elastic.co/apm/apm-server:${ELASTICSEARCH_VERSION}
     depends_on:
@@ -194,15 +194,15 @@ services:
     cap_add: ["CHOWN", "DAC_OVERRIDE", "SETGID", "SETUID"]
     cap_drop: ["ALL"]
     networks:
-    - elastic
+      - elastic
     command: >
-       apm-server -e
-         -E apm-server.rum.enabled=true
-         -E setup.kibana.host=kibana:5601
-         -E setup.template.settings.index.number_of_replicas=0
-         -E apm-server.kibana.enabled=true
-         -E apm-server.kibana.host=kibana:5601
-         -E output.elasticsearch.hosts=["elasticsearch:9200"]
+      apm-server -e
+        -E apm-server.rum.enabled=true
+        -E setup.kibana.host=kibana:5601
+        -E setup.template.settings.index.number_of_replicas=0
+        -E apm-server.kibana.enabled=true
+        -E apm-server.kibana.host=kibana:5601
+        -E output.elasticsearch.hosts=["elasticsearch:9200"]
     healthcheck:
       interval: 10s
       retries: 12
@@ -239,21 +239,21 @@ services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTICSEARCH_VERSION}
     environment:
-    - bootstrap.memory_lock=true
-    - cluster.name=docker-cluster
-    - cluster.routing.allocation.disk.threshold_enabled=false
-    - discovery.type=single-node
-    - ES_JAVA_OPTS=-XX:UseAVX=2 -Xms1g -Xmx1g
+      - bootstrap.memory_lock=true
+      - cluster.name=docker-cluster
+      - cluster.routing.allocation.disk.threshold_enabled=false
+      - discovery.type=single-node
+      - ES_JAVA_OPTS=-XX:UseAVX=2 -Xms1g -Xmx1g
     ulimits:
       memlock:
         hard: -1
         soft: -1
     volumes:
-    - esdata:/usr/share/elasticsearch/data
+      - esdata:/usr/share/elasticsearch/data
     ports:
-    - 9200:9200
+      - 9200:9200
     networks:
-    - elastic
+      - elastic
     healthcheck:
       interval: 20s
       retries: 10
@@ -267,9 +267,9 @@ services:
       - ELASTICSEARCH_URL=http://elasticsearch:9200
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
     ports:
-    - 5601:5601
+      - 5601:5601
     networks:
-    - elastic
+      - elastic
     healthcheck:
       interval: 10s
       retries: 20
@@ -308,7 +308,7 @@ services:
     command: ["--strict.perms=false", "-system.hostfs=/hostfs"]
     restart: on-failure
 
-# OTEL
+  # OTEL
   otel-collector:
     image: otel/opentelemetry-collector-contrib:${OTEL_VERSION}
     command: ["--config=/etc/otel-collector-config.yaml"]
@@ -322,7 +322,7 @@ services:
       - kafka-1
     networks:
       - elastic
-  
+
   otel-ingester:
     image: otel/opentelemetry-collector-contrib:${OTEL_VERSION}
     command: ["--config=/etc/otel-collector-config.yaml"]
@@ -335,7 +335,7 @@ services:
       - jaeger-collector
     networks:
       - elastic
-      
+
   jaeger-collector:
     image: jaegertracing/jaeger-collector:${JAEGER_VERSION}
     environment:
@@ -351,7 +351,7 @@ services:
       - elasticsearch
     networks:
       - elastic
-      
+
 
   jaeger-query:
     image: jaegertracing/jaeger-query:${JAEGER_VERSION}
@@ -381,11 +381,11 @@ services:
       - '--web.enable-lifecycle'
     restart: on-failure
     ports:
-     - "9090:9090"
+      - "9090:9090"
     networks:
       - elastic
 
-# Load data
+  # Load data
   load-data-p1:
     image: "ianitrix/kafka:${CONFLUENT_VERSION}"
     networks:
@@ -476,7 +476,7 @@ services:
     environment:
       KAFKA_OPTS: "-javaagent:/opentelemetry-javaagent-all.jar -Xms256m -Xmx256m"
       OTEL_RESOURCE_ATTRIBUTES: "service.name=consumer2,service.version=1.1,deployment.environment=production"
-      OTEL_EXPORTER_OTLP_ENDPOINT: "${EXPORTER}"  
+      OTEL_EXPORTER_OTLP_ENDPOINT: "${EXPORTER}"
     entrypoint: "kafka-console-consumer --topic test1 --from-beginning --bootstrap-server kafka-1:9092 --consumer.config /kafka.config --consumer-property client.id=myConsumer2 --group=myGroup2"
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
@@ -782,7 +782,7 @@ services:
     hostname: front
     container_name: front
     networks:
-      - elastic      
+      - elastic
     ports:
       - "4200:4200"
     healthcheck:
