@@ -4,6 +4,8 @@
 
 Example of APM for Kafka
 
+> Use version **1.5.3** of OpenTelemetry agent
+
 
 # Architecture of collect
 
