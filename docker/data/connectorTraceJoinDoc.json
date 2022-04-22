@@ -1,7 +1,7 @@
 {
   "name":"connect-join-doc",
   "config": {
-    "connector.class":"FileStreamSink",
+    "connector.class":"io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
     "name":"connect-join-doc",
     "topics":"fusionJoinDoc",
     "key.ignore": "true",
@@ -9,7 +9,14 @@
     "errors.tolerance":"none",
     "errors.retry.timeout":-1,
     "key.converter": "org.apache.kafka.connect.storage.StringConverter",
-    "file":"/tmp/testJoinDoc.txt",
-    "consumer.override.sasl.jaas.config":"org.apache.kafka.common.security.scram.ScramLoginModule required username=admin  password=admin-secret;"
+    "consumer.override.sasl.jaas.config":"org.apache.kafka.common.security.scram.ScramLoginModule required username=admin  password=admin-secret;",
+    "connection.url": "http://elasticsearch:9200",
+    "transforms":"topicTarget,InsertField",
+    "transforms.topicTarget.type":"org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.topicTarget.regex":"(.*)",
+    "transforms.topicTarget.replacement":"data",
+    "transforms.InsertField.type": "org.apache.kafka.connect.transforms.InsertField$Value",
+    "transforms.InsertField.static.field": "topic",
+    "transforms.InsertField.static.value": "fusionJoinDoc"
   }
 }

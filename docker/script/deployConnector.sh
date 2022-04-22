@@ -31,6 +31,9 @@ then
   exit 0
 else
   echo "Fail: status ${result}"
+
+  # Execute again in order to log error msg
+  curl -XPOST -H "Content-Type: application/json" ${url}/connectors --data "@${file}"
   exit 1
 fi
 

@@ -1,14 +1,22 @@
 {
   "name":"connect-test3",
   "config": {
-    "connector.class":"FileStreamSink",
+    "connector.class":"io.confluent.connect.elasticsearch.ElasticsearchSinkConnector",
     "name":"connect-test3",
     "topics":"test_json_kstream_stateless",
     "key.ignore": "true",
     "schema.ignore":true,
     "errors.tolerance":"none",
     "errors.retry.timeout":-1,
-    "file":"/tmp/test3.txt",
-    "consumer.override.sasl.jaas.config":"org.apache.kafka.common.security.scram.ScramLoginModule required username=admin  password=admin-secret;"
+    "file":"/result/test3.txt",
+    "consumer.override.sasl.jaas.config":"org.apache.kafka.common.security.scram.ScramLoginModule required username=admin  password=admin-secret;",
+    "connection.url": "http://elasticsearch:9200",
+    "transforms":"topicTarget,InsertField",
+    "transforms.topicTarget.type":"org.apache.kafka.connect.transforms.RegexRouter",
+    "transforms.topicTarget.regex":"(.*)",
+    "transforms.topicTarget.replacement":"data",
+    "transforms.InsertField.type": "org.apache.kafka.connect.transforms.InsertField$Value",
+    "transforms.InsertField.static.field": "topic",
+    "transforms.InsertField.static.value": "test_json_kstream_stateless"
   }
 }

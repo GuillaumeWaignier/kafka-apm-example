@@ -116,13 +116,15 @@ services:
       - KAFKA_internal_key_converter=org.apache.kafka.connect.json.JsonConverter
       - KAFKA_internal_value_converter=org.apache.kafka.connect.json.JsonConverter
       - KAFKA_rest_advertised_host_name=kafka-connect
-      - KAFKA_plugin_path=/confluent-${CONFLUENT_VERSION}/share/java
+      - KAFKA_plugin_path=/confluent-${CONFLUENT_VERSION}/share/java,/confluentinc-kafka-connect-elasticsearch
       - KAFKA_log4j_root_loglevel=INFO
       - KAFKA_log4j_loggers=org.reflections=ERROR
       - KAFKA_connector_client_config_override_policy=All
     restart: on-failure
     volumes:
+      - ./confluentinc-kafka-connect-elasticsearch-11.1.10:/confluentinc-kafka-connect-elasticsearch:ro
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
+      - data-connector:/result/
 
 
   ksql:
@@ -796,6 +798,8 @@ volumes:
   data-zk-log-1:
   data-zk-data-1:
   data-kafka-1:
+  data-connector:
+
 
 
 networks:
