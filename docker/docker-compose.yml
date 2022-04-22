@@ -186,28 +186,6 @@ services:
 
 
   # Elastic stack
-  apm-server:
-    image: docker.elastic.co/apm/apm-server:${ELASTICSEARCH_VERSION}
-    depends_on:
-      - elasticsearch
-      - kibana
-    cap_add: ["CHOWN", "DAC_OVERRIDE", "SETGID", "SETUID"]
-    cap_drop: ["ALL"]
-    networks:
-      - elastic
-    command: >
-      apm-server -e
-        -E apm-server.rum.enabled=true
-        -E setup.kibana.host=kibana:5601
-        -E setup.template.settings.index.number_of_replicas=0
-        -E apm-server.kibana.enabled=true
-        -E apm-server.kibana.host=kibana:5601
-        -E output.elasticsearch.hosts=["elasticsearch:9200"]
-    healthcheck:
-      interval: 10s
-      retries: 12
-      test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:8200/
-
   apm-server-secure:
     image: docker.elastic.co/apm/apm-server:${ELASTICSEARCH_VERSION}
     depends_on:
@@ -332,40 +310,9 @@ services:
     depends_on:
       - kafka-1
       - elasticsearch
-      - jaeger-collector
     networks:
       - elastic
 
-  jaeger-collector:
-    image: jaegertracing/jaeger-collector:${JAEGER_VERSION}
-    environment:
-      SPAN_STORAGE_TYPE: elasticsearch
-      ES_SERVER_URLS: http://elasticsearch:9200
-    ports:
-      - "14269"
-      - "14268:14268"
-      - "14250"
-      - "9411:9411"
-    restart: on-failure
-    depends_on:
-      - elasticsearch
-    networks:
-      - elastic
-
-
-  jaeger-query:
-    image: jaegertracing/jaeger-query:${JAEGER_VERSION}
-    environment:
-      SPAN_STORAGE_TYPE: elasticsearch
-      ES_SERVER_URLS: http://elasticsearch:9200
-    ports:
-      - "16686:16686"
-      - "16687"
-    restart: on-failure
-    depends_on:
-      - elasticsearch
-    networks:
-      - elastic
 
   # Prometheus
   prometheus:
@@ -801,7 +748,7 @@ services:
       - FRONT=http://front:4200
       - FILE=main.b305e57a9e0eaa346468.js
     depends_on:
-      - apm-server
+      - apm-server-secure
       - front
     networks:
       - elastic
@@ -819,7 +766,7 @@ services:
       - FRONT=http://front:4200
       - FILE=polyfills.a6d94ff5c7441bee20f9.js
     depends_on:
-      - apm-server
+      - apm-server-secure
       - front
     networks:
       - elastic
