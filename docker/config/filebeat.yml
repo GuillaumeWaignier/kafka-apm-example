@@ -30,6 +30,12 @@ processors:
     target: ""
     overwrite_keys: false
     add_error_key: true
+- copy_fields:
+    fields:
+      - from: container.name
+        to: service.name
+    fail_on_error: false
+    ignore_missing: true
 
 #========================== Elasticsearch output ===============================
 output.elasticsearch:
