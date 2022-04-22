@@ -744,9 +744,9 @@ services:
     entrypoint:
       - "/uploadSourceMap.sh"
     environment:
-      - APM=http://apm-server:8200
+      - APM=http://apm-server-secure:8200
       - FRONT=http://front:4200
-      - FILE=main.b305e57a9e0eaa346468.js
+      - FILE=main.ca2be0a261ec09fb9760.js
     depends_on:
       - apm-server-secure
       - front
@@ -762,7 +762,7 @@ services:
     entrypoint:
       - "/uploadSourceMap.sh"
     environment:
-      - APM=http://apm-server:8200
+      - APM=http://apm-server-secure:8200
       - FRONT=http://front:4200
       - FILE=polyfills.a6d94ff5c7441bee20f9.js
     depends_on:
