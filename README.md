@@ -18,9 +18,9 @@ into an [OpenTemetry collector](https://github.com/open-telemetry/opentelemetry-
 The collector send traces inside a Kafka topic named _otlp_spans_.
 You can see this topic with AKHQ at [http://localhost:8080/ui/docker-kafka-server/topic/oltp_spans/data](http://localhost:8080/ui/docker-kafka-server/topic/oltp_spans/data).
 
-Then a second OpenTelemetry collector consumes the trace from Kafka and send them inside two different tools.
-* One is the [Elastic APM](https://www.elastic.co/fr/apm). You can find the result at [http://localhost:5601/app/apm/services?rangeFrom=now-15m&rangeTo=now](http://localhost:5601/app/apm/services?rangeFrom=now-15m&rangeTo=now)
-* The other is [Jaeger](https://www.jaegertracing.io/). You can find the result at [http://localhost:16686/search](http://localhost:16686/search).
+Then a second OpenTelemetry collector consumes the trace from Kafka and send them inside Elasticsearch.
+* [Elastic APM](https://www.elastic.co/fr/apm). You can find the result at [http://localhost:5601/app/apm/services?rangeFrom=now-15m&rangeTo=now](http://localhost:5601/app/apm/services?rangeFrom=now-15m&rangeTo=now)
+
 
 # Test with simple kafka producer/consumer
 
@@ -33,14 +33,13 @@ A stateless KSQL query consumes also the same topic
 CREATE STREAM json(id VARCHAR) WITH(VALUE_FORMAT='DELIMITED', KAFKA_TOPIC='test1');
 CREATE STREAM test_json_ksql WITH(VALUE_FORMAT='json') AS SELECT * FROM json;
 ```
-![kafka-apm-example](doc/apm-jaeger-simple.png "Simple jaeger")
 
-With Jaeger, we can trace the records between producer and consumer.
-We also have the trace after the KSQL process (there were lost with the otel agent in version 1.5.3).
 
 ![kafka-apm-example](doc/apm-elastic-simple.png "Simple jaeger")
 
-We have the same with elastic.
+We can trace the records between producer and consumer.
+We also have the trace after the KSQL process (there were lost with the otel agent in version 1.5.3).
+
 
 # Test with API
 
@@ -50,13 +49,11 @@ We have the same with elastic.
 In this example, the kafka's records are sent with a REST API.
 The consumption is the same as previous example.
 
-![kafka-apm-example](doc/apm-jaeger-api.png "Simple jaeger")
-
-With Jaeger, we see the trace between the POST REST api call and the production into kafka topic.
 
 ![kafka-apm-example](doc/apm-elastic-api.png "Simple jaeger")
 
-The same with elastic.
+We see the trace between the POST REST api call and the production into kafka topic.
+
 
 # Test with a stateless kstream
 
@@ -66,15 +63,11 @@ A Producer sends traces inside a Kafka topic named _test3_.
 A stateless kafka kstream (a simple _map_) convert the string record into json record and produces them inside a topic named _test_json_kstream_stateless_.
 A kafka connect (connector Elasticsearch) consumes this topic and send records inside Elasticsearch.
 
-![kafka-apm-example](doc/apm-jaeger-map.png "Simple jaeger")
-
-With Jaeger, we follow the traces through the kafka stream.
-We can also see the consumption by kafka connect.
-However, we cannot see the indexation inside Elasticsearch.
-
 ![kafka-apm-example](doc/apm-elastic-map.png "Simple jaeger")
 
-The same with elastic.
+We follow the traces through the kafka stream.
+We can also see the consumption by kafka connect.
+However, we cannot see the indexation inside Elasticsearch.
 
 # Test with a statefull (join) kstream
 
@@ -87,15 +80,11 @@ A statefull kafka kstream joins the topic _test2_ (a KStream) with the _topic1_ 
 The result is produced into a topic named _test_json_kstream_statefullJoin_.
 A kafka connect (connector Elasticsearch) consumes this topic and send records inside Elasticsearch.
 
-![kafka-apm-example](doc/apm-jaeger-join.png "Simple jaeger")
-
-With Jaeger, we follow the traces that come from _topic2_ through the kafka stream topology.
-We can also see the consumption by kafka connect.
-However, we cannot see the indexation inside Elasticsearch.
-
 ![kafka-apm-example](doc/apm-elastic-join.png "Simple jaeger")
 
-The same with elastic.
+We follow the traces that come from _topic2_ through the kafka stream topology.
+We can also see the consumption by kafka connect.
+However, we cannot see the indexation inside Elasticsearch.
 
 # Test with angular front
 
