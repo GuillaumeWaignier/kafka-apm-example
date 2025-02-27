@@ -3,23 +3,16 @@ services:
 
   # Confluent kafka stack
   zk-1:
-    image: ianitrix/kafka:${CONFLUENT_VERSION}
-    command: zookeeper-server-start
+    image: confluentinc/cp-zookeeper:${CONFLUENT_VERSION}
     hostname: zk-1
     container_name: zk-1
     restart: on-failure
-    volumes:
-      - data-zk-log-1:/var/lib/zookeeper/log
-      - data-zk-data-1:/var/lib/zookeeper/data
     networks:
       - elastic
     environment:
-      - KAFKA_SERVER_ID=1
-      - KAFKA_clientPort=2181
-      - KAFKA_dataDir=/tmp/zookeeper
-      - KAFKA_tickTime=2000
-      - KAFKA_4lw_commands_whitelist=stat, ruok, conf, isro
-      - KAFKA_OPTS=-Xms128m -Xmx128m
+      - ZOOKEEPER_CLIENT_PORT=2181
+      - ZOOKEEPER_TICK_TIME=2000
+      - KAFKA_OPTS=-Xms128m -Xmx128m -Dzookeeper.4lw.commands.whitelist=stat,ruok,conf,isro
     healthcheck:
       test: test `echo "ruok" | nc localhost 2181 | grep "imok"`
       interval: 2s
@@ -28,7 +21,7 @@ services:
       start_period: 2s
 
   create-admin-user:
-    image: "ianitrix/kafka:${CONFLUENT_VERSION}"
+    image: confluentinc/cp-kafka:${CONFLUENT_VERSION}
     depends_on:
       - zk-1
     entrypoint: "kafka-configs --zookeeper zk-1:2181 --alter --add-config SCRAM-SHA-512='[password=admin-secret]' --entity-type users --entity-name admin"
@@ -37,7 +30,7 @@ services:
       - elastic
 
   kafka-1:
-    image: ianitrix/kafka:${CONFLUENT_VERSION}
+    image: confluentinc/cp-kafka:${CONFLUENT_VERSION}
     hostname: kafka-1
     container_name: kafka-1
     restart: on-failure
@@ -48,22 +41,21 @@ services:
     volumes:
       - data-kafka-1:/var/lib/kafka/data
     environment:
-      - KAFKA_broker_id=101
-      - KAFKA_zookeeper_connect=zk-1:2181
-      - KAFKA_advertised_listeners=SECURE://kafka-1:9092
-      - KAFKA_listener_security_protocol_map=SECURE:SASL_PLAINTEXT
-      - KAFKA_listeners=SECURE://:9092
-      - KAFKA_sasl_enabled_mechanisms=SCRAM-SHA-512
-      - KAFKA_sasl_mechanism_inter_broker_protocol=SCRAM-SHA-512
-      - KAFKA_inter_broker_listener_name=SECURE
-      - "KAFKA_listener_name_secure_scram-sha-512_sasl_jaas_config=org.apache.kafka.common.security.scram.ScramLoginModule required username=admin password=admin-secret;"
-      - KAFKA_auto_create_topics_enable=true
-      - KAFKA_delete_topic_enable=true
-      - KAFKA_offsets_topic_replication_factor=1
-      - KAFKA_confluent_topic_replication_factor=1
+      - KAFKA_BROKER_ID=101
+      - KAFKA_ZOOKEEPER_CONNECT=zk-1:2181
+      - KAFKA_ADVERTISED_LISTENERS=SECURE://kafka-1:9092
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=SECURE:SASL_PLAINTEXT
+      - KAFKA_LISTENERS=SECURE://:9092
+      - KAFKA_SASL_ENABLED_MECHANISMS=SCRAM-SHA-512
+      - KAFKA_SASL_MECHANISM_INTER_BROKER_PROTOCOL=SCRAM-SHA-512
+      - KAFKA_INTER_BROKER_LISTENER_NAME=SECURE
+      - KAFKA_LISTENER_NAME_SECURE_SCRAM___SHA___512_SASL_JAAS_CONFIG=org.apache.kafka.common.security.scram.ScramLoginModule required username=admin password=admin-secret;
+      - KAFKA_AUTO_CREATE_TOPIC_ENABLE=true
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_CONFLUENT_TOPIC_REPLICATION_FACTOR=1
       - KAFKA_OPTS=-Xms256m -Xmx256m
-      - KAFKA_authorizer_class_name=kafka.security.authorizer.AclAuthorizer
-      - KAFKA_super_users=User:admin
+      - KAFKA_AUTHORIZER_CLASS_NAME=kafka.security.authorizer.AclAuthorizer
+      - KAFKA_SUPER_USERS=User:admin
     healthcheck:
       test: nc -z localhost 9092
       interval: 2s
@@ -73,8 +65,7 @@ services:
 
 
   kafka-connect:
-    image: "ianitrix/kafka:${CONFLUENT_VERSION}"
-    command: connect-distributed
+    image: confluentinc/cp-kafka-connect:${CONFLUENT_VERSION}
     hostname: kafka-connect
     ports:
       - 8083:8083
@@ -92,34 +83,33 @@ services:
       - KAFKA_OPTS=-javaagent:/opentelemetry-javaagent-all.jar -Xms512m -Xmx512m -Dotel.instrumentation.common.experimental.suppress-messaging-receive-spans=true
       - OTEL_RESOURCE_ATTRIBUTES=service.name=connect,service.version=1.1,deployment.environment=production
       - OTEL_EXPORTER_OTLP_ENDPOINT=${EXPORTER}
-      - KAFKA_bootstrap_servers=kafka-1:9092
-      - KAFKA_security_protocol=SASL_PLAINTEXT
-      - KAFKA_sasl_mechanism=SCRAM-SHA-512
-      - "KAFKA_sasl_jaas_config=org.apache.kafka.common.security.scram.ScramLoginModule required username=admin password=admin-secret;"
-      - KAFKA_consumer_sasl_mechanism=SCRAM-SHA-512
-      - KAFKA_producer_sasl_mechanism=SCRAM-SHA-512
-      - KAFKA_consumer_security_protocol=SASL_PLAINTEXT
-      - KAFKA_producer_security_protocol=SASL_PLAINTEXT
-      - KAFKA_rest_port=8083
-      - KAFKA_group_id=connect
-      - KAFKA_config_storage_topic=_connect-config
-      - KAFKA_offset_storage_topic=_connect-offsets
-      - KAFKA_status_storage_topic=_connect-status
-      - KAFKA_replication_factor=1
-      - KAFKA_config_storage_replication_factor=1
-      - KAFKA_offset_storage_replication_factor=1
-      - KAFKA_status_storage_replication_factor=1
-      - KAFKA_key_converter=org.apache.kafka.connect.json.JsonConverter
-      - KAFKA_value_converter=org.apache.kafka.connect.json.JsonConverter
-      - KAFKA_key_converter_schemas_enable=false
-      - KAFKA_value_converter_schemas_enable=false
-      - KAFKA_internal_key_converter=org.apache.kafka.connect.json.JsonConverter
-      - KAFKA_internal_value_converter=org.apache.kafka.connect.json.JsonConverter
-      - KAFKA_rest_advertised_host_name=kafka-connect
-      - KAFKA_plugin_path=/confluent-${CONFLUENT_VERSION}/share/java,/plugin_connect
-      - KAFKA_log4j_root_loglevel=INFO
-      - KAFKA_log4j_loggers=org.reflections=ERROR
-      - KAFKA_connector_client_config_override_policy=All
+      - CONNECT_BOOTSTRAP_SERVERS=kafka-1:9092
+      - CONNECT_REST_ADVERTISED_HOST_NAME=kafka-connect
+      - CONNECT_REST_PORT=8083
+      - CONNECT_GROUP_ID=connect
+      - CONNECT_CONFIG_STORAGE_TOPIC=_connect_config
+      - CONNECT_OFFSET_STORAGE_TOPIC=_connect_offset
+      - CONNECT_STATUS_STORAGE_TOPIC=_connect_status
+      - CONNECT_CONFIG_STORAGE_REPLICATION_FACTOR=1
+      - CONNECT_OFFSET_STORAGE_REPLICATION_FACTOR=1
+      - CONNECT_STATUS_STORAGE_REPLICATION_FACTOR=1
+      - CONNECT_CONNECTOR_CLIENT_CONFIG_OVERRIDE_POLICY=All
+      - CONNECT_SECURITY_PROTOCOL=SASL_PLAINTEXT
+      - CONNECT_SASL_MECHANISM=SCRAM-SHA-512
+      - CONNECT_SASL_JAAS_CONFIG=org.apache.kafka.common.security.scram.ScramLoginModule required username=admin password=admin-secret;
+      - CONNECT_CONSUMER_SASL_MECHANISM=SCRAM-SHA-512
+      - CONNECT_PRODUCER_SASL_MECHANISM=SCRAM-SHA-512
+      - CONNECT_CONSUMER_SECURITY_PROTOCOL=SASL_PLAINTEXT
+      - CONNECT_PRODUCER_SECURITY_PROTOCOL=SASL_PLAINTEXT
+      - CONNECT_KEY_CONVERTER=org.apache.kafka.connect.json.JsonConverter
+      - CONNECT_VALUE_CONVERTER=org.apache.kafka.connect.json.JsonConverter
+      - CONNECT_KEY_CONVERTER_SCHEMAS_ENABLE=false
+      - CONNECT_VALUE_CONVERTER_SCHEMAS_ENABLE=false
+      - CONNECT_INTERNAL_KEY_CONVERTER=org.apache.kafka.connect.json.JsonConverter
+      - CONNECT_INTERNAL_VALUE_CONVERTER=org.apache.kafka.connect.json.JsonConverter
+      - CONNECT_PLUGIN_PATH=/confluent-${CONFLUENT_VERSION}/share/java,/plugin_connect
+      - CONNECT_LOG4J_ROOT_LOGLEVEL=INFO
+      - CONNECT_LOG4J_LOGGERS=org.reflections=ERROR
     restart: on-failure
     volumes:
       - ./plugin_connect:/plugin_connect:ro
@@ -177,6 +167,9 @@ services:
               connect:
                 - name: connect
                   url: "http://kafka-connect:8083"
+              ksqldb:
+                - name: ksqldb
+                  url: http://ksql:8088
     ports:
       - 8080:8080
     networks:
@@ -334,7 +327,7 @@ services:
 
   # Load data
   load-data-p1:
-    image: "ianitrix/kafka:${CONFLUENT_VERSION}"
+    image: "ianitrix/kafka:${IANITRIX_VERSION}"
     networks:
       - elastic
     depends_on:
@@ -350,7 +343,7 @@ services:
     restart: on-failure
 
   load-data-p2:
-    image: "ianitrix/kafka:${CONFLUENT_VERSION}"
+    image: "ianitrix/kafka:${IANITRIX_VERSION}"
     networks:
       - elastic
     depends_on:
@@ -366,7 +359,7 @@ services:
     restart: on-failure
 
   load-data-p3:
-    image: "ianitrix/kafka:${CONFLUENT_VERSION}"
+    image: "ianitrix/kafka:${IANITRIX_VERSION}"
     networks:
       - elastic
     depends_on:
@@ -382,7 +375,7 @@ services:
     restart: on-failure
 
   load-data-p4:
-    image: "ianitrix/kafka:${CONFLUENT_VERSION}"
+    image: "ianitrix/kafka:${IANITRIX_VERSION}"
     networks:
       - elastic
     depends_on:
@@ -399,7 +392,7 @@ services:
 
 
   consume-data-c1:
-    image: "ianitrix/kafka:${CONFLUENT_VERSION}"
+    image: "ianitrix/kafka:${IANITRIX_VERSION}"
     networks:
       - elastic
     depends_on:
@@ -415,7 +408,7 @@ services:
     restart: on-failure
 
   consume-data-c2:
-    image: "ianitrix/kafka:${CONFLUENT_VERSION}"
+    image: "ianitrix/kafka:${IANITRIX_VERSION}"
     networks:
       - elastic
     depends_on:
