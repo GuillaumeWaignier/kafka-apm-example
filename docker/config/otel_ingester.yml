@@ -10,12 +10,8 @@ receivers:
     topic: oltp_spans
   
 exporters:
-  jaeger:
-    endpoint: jaeger-collector:14250
-    tls:
-      insecure: true
   otlp/elastic:
-    endpoint: "http://apm-server:8200"
+    endpoint: "http://apm-server-secure:8200"
     tls:
       insecure: true
       
@@ -27,5 +23,5 @@ service:
     traces:
       receivers: [kafka]
       processors: [batch]
-      exporters: [jaeger,"otlp/elastic"]
+      exporters: ["otlp/elastic"]
  

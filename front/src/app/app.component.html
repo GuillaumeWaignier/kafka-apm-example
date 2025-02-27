@@ -357,27 +357,27 @@
   <p>Here are some buttons to test Elastic RUM:</p>
 
   <div class="card-container">
-    <button class="card" (click)="generateFrontEndError()">
+    <button name="generateFrontEndError" class="card" (click)="generateFrontEndError()">
       Generate FrontEnd Error
     </button>
 
-    <button class="card" (click)="postHttp()">
+    <button name="sendToto" class="card" (click)="postHttp()">
       Post Http (topic test2: toto)
     </button>
 
-    <button class="card" (click)="postHttpPayment()">
+    <button name="sendPayment" class="card" (click)="postHttpPayment()">
       Post Http payment
     </button>
 
-    <button class="card" (click)="postHttpInvoice()">
+    <button name="sendInvoice" class="card" (click)="postHttpInvoice()">
       Post Http invoice
     </button>
 
-    <button class="card" (click)="postHttpError()">
+    <button name="sendError" class="card" (click)="postHttpError()">
       Post Http (topic test2: error)
     </button>
 
-    <button class="card" (click)="getHttp404()">
+    <button name="404" class="card" (click)="getHttp404()">
       Get Http 404
     </button>
 
