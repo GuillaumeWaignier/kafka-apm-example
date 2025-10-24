@@ -83,6 +83,7 @@ services:
       - KAFKA_OPTS=-javaagent:/opentelemetry-javaagent-all.jar -Xms512m -Xmx512m -Dotel.instrumentation.common.experimental.suppress-messaging-receive-spans=true
       - OTEL_RESOURCE_ATTRIBUTES=service.name=connect,service.version=1.1,deployment.environment=production
       - OTEL_EXPORTER_OTLP_ENDPOINT=${EXPORTER}
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
       - CONNECT_BOOTSTRAP_SERVERS=kafka-1:9092
       - CONNECT_REST_ADVERTISED_HOST_NAME=kafka-connect
       - CONNECT_REST_PORT=8083
@@ -130,6 +131,7 @@ services:
       - KSQL_OPTS=-javaagent:/opentelemetry-javaagent-all.jar -Xms512m -Xmx512m -Dotel.instrumentation.common.experimental.suppress-messaging-receive-spans=true
       - OTEL_RESOURCE_ATTRIBUTES=service.name=ksql,service.version=1.1,deployment.environment=production
       - OTEL_EXPORTER_OTLP_ENDPOINT=${EXPORTER}
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
       - KSQL_BOOTSTRAP_SERVERS=kafka-1:9092
       - KSQL_SECURITY_PROTOCOL=SASL_PLAINTEXT
       - KSQL_SASL_MECHANISM=SCRAM-SHA-512
@@ -148,6 +150,7 @@ services:
   akhq:
     image: tchiotludo/akhq:${AKHQ_VERSION}
     environment:
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
       OTEL_RESOURCE_ATTRIBUTES: "service.name=akhq,service.version=1.1,deployment.environment=production"
       OTEL_EXPORTER_OTLP_ENDPOINT: "${EXPORTER}"
       JAVA_OPTS: "-javaagent:/opentelemetry-javaagent-all.jar -Xms256m -Xmx256m -Dotel.instrumentation.common.experimental.suppress-messaging-receive-spans=true"
@@ -336,6 +339,7 @@ services:
       KAFKA_OPTS: "-javaagent:/opentelemetry-javaagent-all.jar -Xms256m -Xmx256m -Dotel.instrumentation.common.experimental.suppress-messaging-receive-spans=true"
       OTEL_RESOURCE_ATTRIBUTES: "service.name=producer1,service.version=1.1,deployment.environment=production"
       OTEL_EXPORTER_OTLP_ENDPOINT: "${EXPORTER}"
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
     entrypoint: "kafka-producer-perf-test --topic test1 --num-records 1000000 --throughput ${THROUGHPUT} --record-size 100 --producer.config /kafka.config"
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
@@ -352,6 +356,7 @@ services:
       KAFKA_OPTS: "-javaagent:/opentelemetry-javaagent-all.jar -Xms256m -Xmx256m -Dotel.instrumentation.common.experimental.suppress-messaging-receive-spans=true"
       OTEL_RESOURCE_ATTRIBUTES: "service.name=producer2,service.version=1.1,deployment.environment=production"
       OTEL_EXPORTER_OTLP_ENDPOINT: "${EXPORTER}"
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
     entrypoint: "kafka-producer-perf-test --topic test2 --num-records 1000000 --throughput ${THROUGHPUT} --record-size 100 --producer.config /kafka.config --producer-props client.id=producer2"
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
@@ -368,6 +373,7 @@ services:
       KAFKA_OPTS: "-javaagent:/opentelemetry-javaagent-all.jar -Xms256m -Xmx256m -Dotel.instrumentation.common.experimental.suppress-messaging-receive-spans=true"
       OTEL_RESOURCE_ATTRIBUTES: "service.name=producer3,service.version=1.1,deployment.environment=production"
       OTEL_EXPORTER_OTLP_ENDPOINT: "${EXPORTER}"
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
     entrypoint: "kafka-producer-perf-test --topic test3 --num-records 1000000 --throughput ${THROUGHPUT} --record-size 100 --producer.config /kafka.config --producer-props client.id=producer3"
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
@@ -384,6 +390,7 @@ services:
       KAFKA_OPTS: "-javaagent:/opentelemetry-javaagent-all.jar -Xms256m -Xmx256m -Dotel.instrumentation.common.experimental.suppress-messaging-receive-spans=true"
       OTEL_RESOURCE_ATTRIBUTES: "service.name=producer4,service.version=1.1,deployment.environment=production"
       OTEL_EXPORTER_OTLP_ENDPOINT: "${EXPORTER}"
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
     entrypoint: "kafka-producer-perf-test --topic test4 --num-records 1000000 --throughput ${THROUGHPUT} --record-size 100 --producer.config /kafka.config --producer-props client.id=producer4"
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
@@ -401,6 +408,7 @@ services:
       KAFKA_OPTS: "-javaagent:/opentelemetry-javaagent-all.jar -Xms256m -Xmx256m -Dotel.instrumentation.common.experimental.suppress-messaging-receive-spans=true"
       OTEL_RESOURCE_ATTRIBUTES: "service.name=consumer1,service.version=1.1,deployment.environment=production"
       OTEL_EXPORTER_OTLP_ENDPOINT: "${EXPORTER}"
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
     entrypoint: "kafka-console-consumer --topic test1 --from-beginning  --bootstrap-server kafka-1:9092 --consumer.config /kafka.config --consumer-property client.id=myConsumer1 --group=myGroup1"
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
@@ -417,6 +425,7 @@ services:
       KAFKA_OPTS: "-javaagent:/opentelemetry-javaagent-all.jar -Xms256m -Xmx256m -Dotel.instrumentation.common.experimental.suppress-messaging-receive-spans=true"
       OTEL_RESOURCE_ATTRIBUTES: "service.name=consumer2,service.version=1.1,deployment.environment=production"
       OTEL_EXPORTER_OTLP_ENDPOINT: "${EXPORTER}"
+      OTEL_EXPORTER_OTLP_PROTOCOL: grpc
     entrypoint: "kafka-console-consumer --topic test1 --from-beginning --bootstrap-server kafka-1:9092 --consumer.config /kafka.config --consumer-property client.id=myConsumer2 --group=myGroup2"
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
@@ -567,6 +576,7 @@ services:
       - JAVA_HEAP=-Dotel.instrumentation.common.experimental.suppress-messaging-receive-spans=true
       - OTEL_RESOURCE_ATTRIBUTES=service.name=kstream-stateless-2-8,service.version=1.1,deployment.environment=production
       - OTEL_EXPORTER_OTLP_ENDPOINT=${EXPORTER}
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
 
@@ -588,6 +598,7 @@ services:
       - JAVA_OPTION=-javaagent:/opentelemetry-javaagent-all.jar
       - OTEL_RESOURCE_ATTRIBUTES=service.name=kstream-stateless-2-5,service.version=1.1,deployment.environment=production
       - OTEL_EXPORTER_OTLP_ENDPOINT=${EXPORTER}
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
 
@@ -610,6 +621,7 @@ services:
       - JAVA_HEAP=-Dotel.instrumentation.common.experimental.suppress-messaging-receive-spans=true
       - OTEL_RESOURCE_ATTRIBUTES=service.name=kstream-statefullJoin-2-8,service.version=1.1,deployment.environment=production
       - OTEL_EXPORTER_OTLP_ENDPOINT=${EXPORTER}
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
 
@@ -631,6 +643,7 @@ services:
       - JAVA_OPTION=-javaagent:/opentelemetry-javaagent-all.jar
       - OTEL_RESOURCE_ATTRIBUTES=service.name=kstream-statefullJoin-2-5,service.version=1.1,deployment.environment=production
       - OTEL_EXPORTER_OTLP_ENDPOINT=${EXPORTER}
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
 
@@ -652,6 +665,7 @@ services:
       - JAVA_HEAP=-Dotel.instrumentation.common.experimental.suppress-messaging-receive-spans=true
       - OTEL_RESOURCE_ATTRIBUTES=service.name=kstream-statefullTransform-2-8,service.version=1.1,deployment.environment=production
       - OTEL_EXPORTER_OTLP_ENDPOINT=${EXPORTER}
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
 
@@ -672,6 +686,7 @@ services:
       - JAVA_OPTION=-javaagent:/opentelemetry-javaagent-all.jar
       - OTEL_RESOURCE_ATTRIBUTES=service.name=kstream-statefullAggregation-2-8,service.version=1.1,deployment.environment=production
       - OTEL_EXPORTER_OTLP_ENDPOINT=${EXPORTER}
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
 
@@ -693,6 +708,7 @@ services:
       - JAVA_HEAP=-Dotel.instrumentation.common.experimental.suppress-messaging-receive-spans=true
       - OTEL_RESOURCE_ATTRIBUTES=service.name=kstream-billing-join-2-8,service.version=1.1,deployment.environment=production
       - OTEL_EXPORTER_OTLP_ENDPOINT=${EXPORTER}
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
 
@@ -714,6 +730,7 @@ services:
       - JAVA_HEAP=-Dotel.instrumentation.common.experimental.suppress-messaging-receive-spans=true
       - OTEL_RESOURCE_ATTRIBUTES=service.name=kstream-billing-agg-2-8,service.version=1.1,deployment.environment=production
       - OTEL_EXPORTER_OTLP_ENDPOINT=${EXPORTER}
+      - OTEL_EXPORTER_OTLP_PROTOCOL=grpc
     volumes:
       - ./opentelemetry-javaagent-all.jar:/opentelemetry-javaagent-all.jar:ro
 
