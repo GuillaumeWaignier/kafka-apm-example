@@ -2,6 +2,7 @@ receivers:
   otlp:
     protocols:
       grpc:
+        endpoint: 0.0.0.0:4317
 
 exporters:
   kafka:
@@ -12,7 +13,13 @@ exporters:
         username: admin
         password: admin-secret
         mechanism: SCRAM-SHA-512
-    topic: oltp_spans
+    traces:
+      topic: oltp_spans
+    producer:
+      compression: zstd
+      compression_params:
+        level: 3
+      required_acks: -1
 
   prometheus:
     endpoint: "0.0.0.0:8889"
