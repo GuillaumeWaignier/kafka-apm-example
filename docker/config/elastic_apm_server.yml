@@ -1,0 +1,17 @@
+apm-server:
+  host: "0.0.0.0:8200"
+  rum:
+    enabled: true
+  kibana:
+    enabled: true
+    host: kibana:5601
+  auth.anonymous:
+    rate_limit.event_limit: 300
+    rate_limit.ip_limit: 1000
+    allow_service: angular-app
+  
+output.elasticsearch:
+  hosts: ["elasticsearch:9200"]
+setup:
+  kibana.host: kibana:5601
+  template.settings.index.number_of_replicas: 0

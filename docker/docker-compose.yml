@@ -189,22 +189,14 @@ services:
       - kibana
     cap_add: ["CHOWN", "DAC_OVERRIDE", "SETGID", "SETUID"]
     cap_drop: ["ALL"]
+    user: apm-server
     ports:
       - 8200:8200
+    volumes:
+      - ./config/elastic_apm_server.yml:/usr/share/apm-server/apm-server.yml:ro
     networks:
       - elastic
-    command: >
-      apm-server -e
-        -E apm-server.rum.enabled=true
-        -E setup.kibana.host=kibana:5601
-        -E setup.template.settings.index.number_of_replicas=0
-        -E apm-server.kibana.enabled=true
-        -E apm-server.kibana.host=kibana:5601
-        -E output.elasticsearch.hosts=["elasticsearch:9200"]
-        -E apm-server.auth.anonymous.rate_limit.event_limit=300
-        -E apm-server.auth.anonymous.rate_limit.ip_limit=1000
-        -E apm-server.auth.anonymous.allow_service=angular-app
-
+    command: --strict.perms=false -e
     healthcheck:
       interval: 10s
       retries: 12
@@ -213,6 +205,8 @@ services:
   elasticsearch:
     image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTICSEARCH_VERSION}
     environment:
+      - ELASTIC_PASSWORD=admin
+      - xpack.security.enabled=false
       - bootstrap.memory_lock=true
       - cluster.name=docker-cluster
       - cluster.routing.allocation.disk.threshold_enabled=false
@@ -252,6 +246,8 @@ services:
 
   filebeat:
     image: docker.elastic.co/beats/filebeat:${ELASTICSEARCH_VERSION}
+    depends_on:
+      - kibana
     user: root
     networks:
       - elastic
@@ -279,7 +275,7 @@ services:
     environment:
       - ELASTICSEARCH_HOST=http://elasticsearch:9200
       - KIBANA_HOST=kibana
-    command: ["--strict.perms=false", "-system.hostfs=/hostfs"]
+    command: ["run", "--strict.perms=false", "--system.hostfs=/hostfs"]
     restart: on-failure
 
   # OTEL
