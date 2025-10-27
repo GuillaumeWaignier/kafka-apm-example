@@ -241,13 +241,13 @@ services:
     healthcheck:
       interval: 10s
       retries: 20
-      test: curl --write-out 'HTTP %{http_code}' --fail --silent --output /dev/null http://localhost:5601/api/status
-
+      test: curl --fail --silent http://localhost:5601/api/status | grep -q '"available"'
 
   filebeat:
     image: docker.elastic.co/beats/filebeat:${ELASTICSEARCH_VERSION}
     depends_on:
-      - kibana
+      kibana:
+        condition: service_healthy
     user: root
     networks:
       - elastic
@@ -266,6 +266,9 @@ services:
     user: root
     networks:
       - elastic
+    depends_on:
+      kibana:
+        condition: service_healthy
     volumes:
       - /proc:/hostfs/proc:ro
       - /sys/fs/cgroup:/hostfs/sys/fs/cgroup:ro
