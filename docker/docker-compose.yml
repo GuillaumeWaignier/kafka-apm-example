@@ -23,7 +23,8 @@ services:
   create-admin-user:
     image: confluentinc/cp-kafka:${CONFLUENT_VERSION}
     depends_on:
-      - zk-1
+      zk-1:
+        condition: service_healthy
     entrypoint: "kafka-configs --zookeeper zk-1:2181 --alter --add-config SCRAM-SHA-512='[password=admin-secret]' --entity-type users --entity-name admin"
     restart: on-failure
     networks:
@@ -37,7 +38,10 @@ services:
     networks:
       - elastic
     depends_on:
-      - zk-1
+      zk-1:
+        condition: service_healthy
+      create-admin-user:
+        condition: service_completed_successfully
     volumes:
       - data-kafka-1:/var/lib/kafka/data
     environment:
@@ -60,9 +64,28 @@ services:
       test: nc -z localhost 9092
       interval: 2s
       timeout: 2s
-      retries: 3
-      start_period: 2s
+      retries: 50
+      start_period: 10s
 
+  create-topics:
+    image: confluentinc/cp-kafka:${CONFLUENT_VERSION}
+    hostname: create-topics
+    container_name: create-topics
+    restart: on-failure
+    depends_on:
+      kafka-1:
+        condition: service_healthy
+    networks:
+      - elastic
+    entrypoint: >
+      echo Creating topics... ;
+      kafka-topics --command-config /kafka.config --bootstrap-server kafka-1:9092 --create --topic test1 --partitions 3 --replication-factor 1 ;
+      kafka-topics --command-config /kafka.config --bootstrap-server kafka-1:9092 --create --topic test2 --partitions 3 --replication-factor 1 ;
+      kafka-topics --command-config /kafka.config --bootstrap-server kafka-1:9092 --create --topic test_json_kstream_statefulJoin --partitions 3 --replication-factor 1 ;
+      kafka-topics --command-config /kafka.config --bootstrap-server kafka-1:9092 --create --topic ca-avro-date --partitions 3 --replication-factor 1 ;
+      true'
+    volumes:
+      - ./config/kafka.config:/kafka.config:ro
 
   kafka-connect:
     image: confluentinc/cp-kafka-connect:${CONFLUENT_VERSION}
@@ -230,7 +253,8 @@ services:
   kibana:
     image: docker.elastic.co/kibana/kibana:${ELASTICSEARCH_VERSION}
     depends_on:
-      - elasticsearch
+      elasticsearch:
+        condition: service_healthy
     environment:
       - ELASTICSEARCH_URL=http://elasticsearch:9200
       - ELASTICSEARCH_HOSTS=http://elasticsearch:9200
@@ -607,6 +631,12 @@ services:
     restart: always
     hostname: kstream-statefullJoin-2-8
     container_name: kstream-statefullJoin-2-8
+    depends_on:
+      - otel-ingester
+      - otel-collector
+      - filebeat
+      - metricbeat
+      - create-topics
     networks:
       - elastic
     environment:
@@ -738,6 +768,10 @@ services:
     restart: always
     hostname: front
     container_name: front
+    depends_on:
+      - kstream-statefull-join-2-8
+      - akhq
+      - apm-server-secure
     networks:
       - elastic
     ports:
